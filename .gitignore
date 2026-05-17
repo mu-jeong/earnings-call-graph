@@ -1,0 +1,33 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+
+# Local app/output
+exports/
+data/source_cache/
+# Private source manifests may contain transcript/source URLs
+data/sources/major_companies.json
+!data/sources/major_companies.example.json
+*.db
+*.bak-*
+
+docs/final_submission_*
+docs/auraDB/*
+docs/examples.png
+# Keep docs/example.png tracked because README.md embeds it.
+!docs/example.png
+README.ko.md
+
+# Keep OMX runtime local
+.omx/

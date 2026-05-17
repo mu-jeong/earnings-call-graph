@@ -1,0 +1,1070 @@
+{
+  "concepts": [
+    {
+      "id": "concept-business-domain",
+      "name": "Earnings Call Business Domain",
+      "concept_type": "Root",
+      "description": "Top-level anchor for cross-company business concepts observed in the cleaned earnings-call graph.",
+      "aliases": [
+        "earnings call business domain",
+        "business domain",
+        "business concept"
+      ]
+    },
+    {
+      "id": "concept-company-role",
+      "name": "Company Role",
+      "concept_type": "Class",
+      "description": "A company's role in the AI infrastructure and cloud value chain.",
+      "aliases": [
+        "company role",
+        "ecosystem role",
+        "value chain role"
+      ]
+    },
+    {
+      "id": "concept-ai-value-chain",
+      "name": "AI / Cloud Infrastructure Value Chain",
+      "concept_type": "Class",
+      "description": "The infrastructure stack repeatedly observed in the cleaned data: cloud platforms, compute, data centers, networking, memory, storage, power, and semiconductor capacity.",
+      "aliases": [
+        "AI infrastructure value chain",
+        "AI cloud infrastructure value chain",
+        "AI stack",
+        "AI infrastructure stack",
+        "cloud infrastructure stack",
+        "infrastructure stack"
+      ]
+    },
+    {
+      "id": "concept-business-segment",
+      "name": "Business Segment",
+      "concept_type": "Class",
+      "description": "A reportable or operating business segment, product family, or platform area.",
+      "aliases": [
+        "business segment",
+        "segment",
+        "platform segment"
+      ]
+    },
+    {
+      "id": "concept-financial-metric",
+      "name": "Financial Metric",
+      "concept_type": "Class",
+      "description": "A quantitative or financial performance measure such as revenue, backlog, margin, or CapEx.",
+      "aliases": [
+        "financial metric",
+        "metric",
+        "performance metric"
+      ]
+    },
+    {
+      "id": "concept-risk-pressure",
+      "name": "Risk / Pressure",
+      "concept_type": "Class",
+      "description": "Cost, margin, cash-flow, supply, FX, regulatory, macro, or execution pressure observed in earnings-call commentary.",
+      "aliases": [
+        "risk",
+        "pressure",
+        "headwind",
+        "constraint",
+        "margin pressure",
+        "regulatory risk"
+      ]
+    },
+    {
+      "id": "concept-growth-demand",
+      "name": "Growth / Demand Driver",
+      "concept_type": "Class",
+      "description": "Demand, adoption, usage, monetization, or efficiency drivers cited by management as growth mechanisms.",
+      "aliases": [
+        "growth driver",
+        "demand driver",
+        "adoption driver",
+        "usage driver",
+        "monetization driver",
+        "efficiency driver"
+      ]
+    },
+    {
+      "id": "concept-hyperscaler-cloud",
+      "name": "Hyperscaler / Cloud Platform",
+      "concept_type": "CompanyRole",
+      "description": "Cloud platforms that convert AI demand into cloud services, AI services, backlog, and infrastructure CapEx.",
+      "aliases": [
+        "hyperscaler",
+        "cloud platform",
+        "AWS",
+        "Azure",
+        "Microsoft Cloud",
+        "Google Cloud",
+        "Oracle Cloud",
+        "OCI",
+        "cloud services",
+        "cloud migration",
+        "cloud revenue"
+      ]
+    },
+    {
+      "id": "concept-accelerator-compute-vendor",
+      "name": "AI Accelerator / Compute Vendor",
+      "concept_type": "CompanyRole",
+      "description": "Vendors that supply GPUs, accelerators, custom silicon, CPUs, and AI compute systems.",
+      "aliases": [
+        "AI accelerator",
+        "GPU",
+        "GPUs",
+        "accelerator",
+        "accelerators",
+        "custom silicon",
+        "custom AI chip",
+        "AI chip",
+        "NVIDIA Grace Blackwell",
+        "Blackwell",
+        "MI300",
+        "EPYC",
+        "CPU",
+        "compute silicon"
+      ]
+    },
+    {
+      "id": "concept-foundry-manufacturing",
+      "name": "Foundry / Semiconductor Manufacturing",
+      "concept_type": "CompanyRole",
+      "description": "Manufacturing capacity and foundry services for leading-edge AI and cloud semiconductors.",
+      "aliases": [
+        "foundry",
+        "semiconductor manufacturing",
+        "wafer",
+        "fab",
+        "TSMC",
+        "Intel Foundry",
+        "advanced process",
+        "node migration"
+      ]
+    },
+    {
+      "id": "concept-semicap-equipment",
+      "name": "Semiconductor Equipment",
+      "concept_type": "CompanyRole",
+      "description": "Equipment and process technology that enables leading-edge semiconductor capacity.",
+      "aliases": [
+        "semicap",
+        "semiconductor equipment",
+        "lithography",
+        "EUV",
+        "wafer fabrication equipment",
+        "etch",
+        "deposition",
+        "process equipment",
+        "advanced packaging equipment"
+      ]
+    },
+    {
+      "id": "concept-memory-storage-provider",
+      "name": "Memory / Storage Provider",
+      "concept_type": "CompanyRole",
+      "description": "Memory, storage, and data infrastructure providers supporting AI training, inference, and data growth.",
+      "aliases": [
+        "memory",
+        "storage",
+        "HBM",
+        "DRAM",
+        "NAND",
+        "SSD",
+        "HDD",
+        "hard drives",
+        "mass-capacity storage",
+        "enterprise storage",
+        "data infrastructure"
+      ]
+    },
+    {
+      "id": "concept-networking-provider",
+      "name": "Networking Infrastructure Provider",
+      "concept_type": "CompanyRole",
+      "description": "Networking, switching, routing, and interconnect providers that connect AI clusters and cloud data centers.",
+      "aliases": [
+        "networking",
+        "networking product",
+        "Ethernet",
+        "switch",
+        "switching",
+        "routing",
+        "AI networking",
+        "data center networking",
+        "networking fabric",
+        "interconnect",
+        "NVLink"
+      ]
+    },
+    {
+      "id": "concept-server-systems-provider",
+      "name": "AI Server / Systems Provider",
+      "concept_type": "CompanyRole",
+      "description": "Server, systems, rack-scale, and infrastructure solution providers that package AI compute into deployable systems.",
+      "aliases": [
+        "AI server",
+        "servers",
+        "systems",
+        "rack-scale",
+        "rack scale",
+        "infrastructure solutions",
+        "AI systems",
+        "server platform",
+        "liquid cooling"
+      ]
+    },
+    {
+      "id": "concept-ai-infrastructure",
+      "name": "AI / Cloud Infrastructure",
+      "concept_type": "Theme",
+      "description": "The compute, data center, accelerator, networking, memory, storage, power, and cloud capacity stack discussed across the cleaned company calls.",
+      "aliases": [
+        "AI infrastructure",
+        "cloud infrastructure",
+        "technical infrastructure",
+        "compute infrastructure",
+        "accelerator infrastructure",
+        "AI infrastructure orders",
+        "infrastructure investment",
+        "AI stack"
+      ]
+    },
+    {
+      "id": "concept-ai-demand",
+      "name": "AI Workload Demand",
+      "concept_type": "Theme",
+      "description": "Demand, usage, or workload growth attributed to AI products, models, inference, training, or AI-enabled services.",
+      "aliases": [
+        "AI demand",
+        "AI workloads",
+        "AI workload demand",
+        "demand for AI products",
+        "AI usage",
+        "GenAI demand",
+        "agentic AI",
+        "compute needs",
+        "AI solutions",
+        "frontier models",
+        "foundation model"
+      ]
+    },
+    {
+      "id": "concept-training-compute",
+      "name": "Training Compute",
+      "concept_type": "ValueChainLayer",
+      "description": "Compute used to train or pre-train large AI models.",
+      "aliases": [
+        "training",
+        "model training",
+        "pre-training",
+        "frontier model training",
+        "training clusters"
+      ]
+    },
+    {
+      "id": "concept-inference-compute",
+      "name": "Inference Compute",
+      "concept_type": "ValueChainLayer",
+      "description": "Compute used to serve AI models and agentic workloads in production.",
+      "aliases": [
+        "inference",
+        "inferencing",
+        "AI inference",
+        "reasoning AI",
+        "serving",
+        "production AI",
+        "AI response cost",
+        "latency",
+        "throughput"
+      ]
+    },
+    {
+      "id": "concept-data-center-capacity",
+      "name": "Data Center / Compute Capacity",
+      "concept_type": "ValueChainLayer",
+      "description": "Capacity, compute, power, data center, GPU/TPU, or advanced packaging supply needed to serve AI/cloud demand.",
+      "aliases": [
+        "data center capacity",
+        "data center",
+        "compute capacity",
+        "inference capacity",
+        "capacity",
+        "TPUs",
+        "NVIDIA GPUs",
+        "CoWoS capacity",
+        "advanced packaging capacity",
+        "compute constrained",
+        "power supply constraints",
+        "data center capacity"
+      ]
+    },
+    {
+      "id": "concept-networking-fabric",
+      "name": "Networking Fabric",
+      "concept_type": "ValueChainLayer",
+      "description": "Networking fabric, interconnect, routing, switching, and connectivity required for AI clusters and cloud platforms.",
+      "aliases": [
+        "networking fabric",
+        "networking",
+        "interconnect",
+        "Ethernet",
+        "NVLink",
+        "switches",
+        "routing",
+        "connectivity",
+        "cluster networking"
+      ]
+    },
+    {
+      "id": "concept-memory-bandwidth",
+      "name": "Memory Bandwidth / HBM",
+      "concept_type": "ValueChainLayer",
+      "description": "High-bandwidth memory and DRAM/NAND capacity used by AI accelerators and data platforms.",
+      "aliases": [
+        "memory bandwidth",
+        "HBM",
+        "high bandwidth memory",
+        "DRAM",
+        "NAND",
+        "memory capacity",
+        "semiconductor supply"
+      ]
+    },
+    {
+      "id": "concept-storage-capacity",
+      "name": "Storage Capacity",
+      "concept_type": "ValueChainLayer",
+      "description": "Storage capacity and data infrastructure used for AI data growth and enterprise workloads.",
+      "aliases": [
+        "storage capacity",
+        "storage",
+        "database",
+        "data infrastructure",
+        "mass-capacity storage",
+        "enterprise storage",
+        "SSD",
+        "HDD"
+      ]
+    },
+    {
+      "id": "concept-power-cooling",
+      "name": "Power / Cooling Constraint",
+      "concept_type": "ValueChainLayer",
+      "description": "Power, cooling, and physical data center constraints that limit AI infrastructure deployment.",
+      "aliases": [
+        "power",
+        "power supply",
+        "power supply constraints",
+        "cooling",
+        "liquid cooling",
+        "energy",
+        "data center operating costs"
+      ]
+    },
+    {
+      "id": "concept-cloud-platform-segment",
+      "name": "Cloud Platform Segment",
+      "concept_type": "BusinessSegment",
+      "description": "Company cloud infrastructure/platform segments such as Google Cloud, Azure, AWS, OCI, or similar enterprise cloud businesses.",
+      "aliases": [
+        "Google Cloud",
+        "GCP",
+        "Azure",
+        "Microsoft Cloud",
+        "AWS",
+        "OCI",
+        "Oracle Cloud",
+        "cloud platform",
+        "cloud revenue",
+        "Cloud",
+        "Intelligent Cloud",
+        "cloud services"
+      ]
+    },
+    {
+      "id": "concept-enterprise-ai-adoption",
+      "name": "Enterprise AI Adoption",
+      "concept_type": "Theme",
+      "description": "Enterprise/customer adoption of paid or deployed AI capabilities.",
+      "aliases": [
+        "Enterprise AI adoption",
+        "enterprise AI",
+        "enterprise customers",
+        "paid monthly active users",
+        "Gemini Enterprise",
+        "Copilot adoption",
+        "AI credit consumption",
+        "customer adoption",
+        "business process automation"
+      ]
+    },
+    {
+      "id": "concept-ai-product-monetization",
+      "name": "AI Product Monetization",
+      "concept_type": "Theme",
+      "description": "Ways AI or cloud capabilities are monetized through cloud services, subscriptions, advertising, software, productivity, or enterprise offerings.",
+      "aliases": [
+        "monetization",
+        "AI monetization",
+        "AI services",
+        "Generative AI services",
+        "subscription",
+        "subscriptions",
+        "AI credit consumption",
+        "ads",
+        "advertising revenue",
+        "productivity gains",
+        "cloud monetization"
+      ]
+    },
+    {
+      "id": "concept-infrastructure-capex",
+      "name": "Infrastructure CapEx",
+      "concept_type": "Metric",
+      "description": "Capital expenditures or infrastructure investment for AI, cloud, data centers, compute, or technical infrastructure.",
+      "aliases": [
+        "CapEx",
+        "capital expenditures",
+        "capital expenditure",
+        "AI capex",
+        "AI capital expenditure",
+        "infrastructure capex",
+        "infrastructure spend",
+        "technical infrastructure",
+        "technical infrastructure spend",
+        "data center capex",
+        "compute investment",
+        "capital intensity"
+      ]
+    },
+    {
+      "id": "concept-backlog-rpo",
+      "name": "Backlog / RPO",
+      "concept_type": "Metric",
+      "description": "Contracted backlog, remaining performance obligation, or similar future-revenue visibility measure.",
+      "aliases": [
+        "backlog",
+        "Cloud backlog",
+        "RPO",
+        "remaining performance obligation",
+        "contracted backlog",
+        "future revenue visibility",
+        "next 24 months",
+        "remaining performance obligations"
+      ]
+    },
+    {
+      "id": "concept-revenue-growth",
+      "name": "Revenue Growth",
+      "concept_type": "Metric",
+      "description": "Revenue growth, acceleration, or revenue contribution metrics.",
+      "aliases": [
+        "revenue growth",
+        "Cloud revenue growth",
+        "Revenue grew",
+        "revenue",
+        "revenues",
+        "sales",
+        "Search advertising revenue",
+        "Google Services revenue",
+        "Azure growth",
+        "ARR",
+        "annual recurring revenue",
+        "annualized revenue run rate"
+      ]
+    },
+    {
+      "id": "concept-operating-margin-pressure",
+      "name": "Operating Margin Pressure",
+      "concept_type": "Risk",
+      "description": "Operating margin, P&L, gross margin, depreciation, or cost pressure from investment or operations.",
+      "aliases": [
+        "margin pressure",
+        "P&L pressure",
+        "operating margin",
+        "operating margin management",
+        "gross margin pressure",
+        "cost pressure",
+        "depreciation",
+        "depreciation expense",
+        "data center operating costs",
+        "operating expenses",
+        "margin dilution"
+      ]
+    },
+    {
+      "id": "concept-free-cash-flow-pressure",
+      "name": "Free Cash Flow Pressure",
+      "concept_type": "Risk",
+      "description": "Free cash flow pressure caused by capex, working capital, or infrastructure investment cycles.",
+      "aliases": [
+        "free cash flow",
+        "FCF",
+        "cash flow",
+        "cash flow pressure",
+        "purchases of property and equipment",
+        "working capital"
+      ]
+    },
+    {
+      "id": "concept-supply-constraint",
+      "name": "Supply Constraint",
+      "concept_type": "Risk",
+      "description": "Supply chain, component, memory, capacity, or semiconductor constraints affecting delivery and demand capture.",
+      "aliases": [
+        "supply constraint",
+        "supply chain constraints",
+        "component supply constraints",
+        "semiconductor supply constraints",
+        "inventory",
+        "inventory placement",
+        "capacity constraint",
+        "compute constrained"
+      ]
+    },
+    {
+      "id": "concept-search-ai-usage",
+      "name": "Search AI Usage",
+      "concept_type": "Theme",
+      "description": "AI-driven search usage, query growth, AI overviews, or AI search modes.",
+      "aliases": [
+        "Search AI usage",
+        "AI Overviews",
+        "AI Mode",
+        "Search usage",
+        "query growth",
+        "Search Live",
+        "Search volume uplift"
+      ]
+    },
+    {
+      "id": "concept-ai-efficiency",
+      "name": "AI Efficiency",
+      "concept_type": "Theme",
+      "description": "Hardware, model, or engineering efficiency that reduces latency or cost of AI responses.",
+      "aliases": [
+        "Engineering efficiency",
+        "AI response cost",
+        "Search latency",
+        "latency",
+        "cost of core AI responses",
+        "efficiency",
+        "hardware and engineering breakthroughs",
+        "cost efficiency",
+        "price performance"
+      ]
+    },
+    {
+      "id": "concept-subscription-revenue",
+      "name": "Subscription Revenue",
+      "concept_type": "Metric",
+      "description": "Paid subscription counts or subscription platform/device revenue.",
+      "aliases": [
+        "Subscriptions revenue",
+        "paid subscriptions",
+        "YouTube Music",
+        "YouTube Premium",
+        "Google One",
+        "subscription revenue"
+      ]
+    },
+    {
+      "id": "concept-autonomous-mobility",
+      "name": "Autonomous Mobility",
+      "concept_type": "BusinessSegment",
+      "description": "Autonomous driving or robotaxi activity and expansion.",
+      "aliases": [
+        "Waymo",
+        "autonomous rides",
+        "fully autonomous rides",
+        "Waymo city expansion",
+        "autonomous mobility"
+      ]
+    },
+    {
+      "id": "concept-fx-impact",
+      "name": "Foreign Exchange Impact",
+      "concept_type": "Risk",
+      "description": "Foreign exchange headwinds or tailwinds and constant-currency effects.",
+      "aliases": [
+        "FX",
+        "FX tailwind",
+        "FX headwind",
+        "foreign exchange",
+        "foreign exchange impact",
+        "foreign exchange rate fluctuations",
+        "constant currency",
+        "currency"
+      ]
+    },
+    {
+      "id": "concept-component-cost-pressure",
+      "name": "Component / Input Cost Pressure",
+      "concept_type": "Risk",
+      "description": "Component, input, supply-chain, manufacturing, or cost inflation pressure affecting margins or demand capture.",
+      "aliases": [
+        "component cost",
+        "component costs",
+        "input cost",
+        "input costs",
+        "cost inflation",
+        "cost pressure",
+        "cost headwind",
+        "component cost variability",
+        "manufacturing cost"
+      ]
+    },
+    {
+      "id": "concept-regulatory-compliance-risk",
+      "name": "Regulatory / Compliance Risk",
+      "concept_type": "Risk",
+      "description": "Regulatory, compliance, privacy, data governance, tariff, trade-policy, or geopolitical risk discussed in earnings commentary.",
+      "aliases": [
+        "regulatory risk",
+        "regulatory compliance",
+        "compliance",
+        "privacy concerns",
+        "data governance",
+        "digital trust",
+        "tariffs",
+        "tariff uncertainty",
+        "trade policy",
+        "geopolitical risk",
+        "regulatory uncertainty"
+      ]
+    },
+    {
+      "id": "concept-consumer-demand",
+      "name": "Consumer Demand",
+      "concept_type": "Theme",
+      "description": "Consumer end-market demand, engagement, device demand, or consumer spending signals.",
+      "aliases": [
+        "consumer demand",
+        "consumer market",
+        "consumer devices",
+        "consumer engagement",
+        "consumer spending",
+        "consumer"
+      ]
+    },
+    {
+      "id": "concept-pricing-power",
+      "name": "Pricing Power",
+      "concept_type": "Theme",
+      "description": "Pricing power, price increases, ASP, or pricing strategy that supports revenue or margin outcomes.",
+      "aliases": [
+        "pricing power",
+        "pricing strategy",
+        "price increase",
+        "price increases",
+        "ASP",
+        "average price",
+        "average price per ad",
+        "pricing"
+      ]
+    },
+    {
+      "id": "concept-capital-allocation",
+      "name": "Capital Allocation / Shareholder Returns",
+      "concept_type": "Metric",
+      "description": "Capital allocation actions such as buybacks, dividends, shareholder returns, and balance-sheet capital deployment.",
+      "aliases": [
+        "capital allocation",
+        "shareholder returns",
+        "share repurchases",
+        "buybacks",
+        "dividends",
+        "capital returns to shareholders",
+        "cash return to shareholders"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source": "concept-company-role",
+      "relation_type": "IS_A",
+      "target": "concept-business-domain",
+      "description": "Company role is a top-level class for ecosystem position."
+    },
+    {
+      "source": "concept-ai-value-chain",
+      "relation_type": "IS_A",
+      "target": "concept-business-domain",
+      "description": "AI/cloud infrastructure value chain is a top-level class for infrastructure semantics."
+    },
+    {
+      "source": "concept-business-segment",
+      "relation_type": "IS_A",
+      "target": "concept-business-domain",
+      "description": "Business segment is a top-level class for reportable and operating areas."
+    },
+    {
+      "source": "concept-financial-metric",
+      "relation_type": "IS_A",
+      "target": "concept-business-domain",
+      "description": "Financial metric is a top-level class for quantitative measures."
+    },
+    {
+      "source": "concept-risk-pressure",
+      "relation_type": "IS_A",
+      "target": "concept-business-domain",
+      "description": "Risk or pressure is a top-level class for constraints and headwinds."
+    },
+    {
+      "source": "concept-growth-demand",
+      "relation_type": "IS_A",
+      "target": "concept-business-domain",
+      "description": "Growth and demand drivers are a top-level class for adoption, demand, usage, monetization, and efficiency."
+    },
+    {
+      "source": "concept-hyperscaler-cloud",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Hyperscalers and cloud platforms are AI/cloud infrastructure company roles."
+    },
+    {
+      "source": "concept-accelerator-compute-vendor",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Accelerator and compute vendors are AI/cloud infrastructure company roles."
+    },
+    {
+      "source": "concept-foundry-manufacturing",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Foundry and semiconductor manufacturing is an AI/cloud infrastructure company role."
+    },
+    {
+      "source": "concept-semicap-equipment",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Semiconductor equipment is an AI/cloud infrastructure company role."
+    },
+    {
+      "source": "concept-memory-storage-provider",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Memory and storage providers are AI/cloud infrastructure company roles."
+    },
+    {
+      "source": "concept-networking-provider",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Networking infrastructure providers are AI/cloud infrastructure company roles."
+    },
+    {
+      "source": "concept-server-systems-provider",
+      "relation_type": "IS_A",
+      "target": "concept-company-role",
+      "description": "Server and systems providers are AI/cloud infrastructure company roles."
+    },
+    {
+      "source": "concept-ai-infrastructure",
+      "relation_type": "IS_A",
+      "target": "concept-ai-value-chain",
+      "description": "AI/cloud infrastructure is the core value-chain theme in the cleaned graph."
+    },
+    {
+      "source": "concept-training-compute",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Training compute is part of AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-inference-compute",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Inference compute is part of AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-data-center-capacity",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Data center and compute capacity are part of AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-networking-fabric",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Networking fabric is part of AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-memory-bandwidth",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Memory bandwidth and HBM are part of AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-storage-capacity",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Storage capacity is part of AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-power-cooling",
+      "relation_type": "PART_OF",
+      "target": "concept-ai-infrastructure",
+      "description": "Power and cooling are physical constraints within AI/cloud infrastructure."
+    },
+    {
+      "source": "concept-cloud-platform-segment",
+      "relation_type": "IS_A",
+      "target": "concept-business-segment",
+      "description": "Cloud platforms are business segments or platform areas."
+    },
+    {
+      "source": "concept-autonomous-mobility",
+      "relation_type": "IS_A",
+      "target": "concept-business-segment",
+      "description": "Autonomous mobility is a business segment or operating area."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "AI workload demand is a demand/growth driver."
+    },
+    {
+      "source": "concept-enterprise-ai-adoption",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "Enterprise AI adoption is an adoption/growth driver."
+    },
+    {
+      "source": "concept-search-ai-usage",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "Search AI usage is a usage/growth driver."
+    },
+    {
+      "source": "concept-ai-efficiency",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "AI efficiency improvements are usage, cost, and growth drivers."
+    },
+    {
+      "source": "concept-ai-product-monetization",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "AI product monetization is a growth driver observed across cloud, ads, software, and subscriptions."
+    },
+    {
+      "source": "concept-infrastructure-capex",
+      "relation_type": "IS_A",
+      "target": "concept-financial-metric",
+      "description": "Infrastructure CapEx is an investment metric."
+    },
+    {
+      "source": "concept-backlog-rpo",
+      "relation_type": "IS_A",
+      "target": "concept-financial-metric",
+      "description": "Backlog/RPO is a future revenue visibility metric."
+    },
+    {
+      "source": "concept-revenue-growth",
+      "relation_type": "IS_A",
+      "target": "concept-financial-metric",
+      "description": "Revenue growth is a financial performance metric."
+    },
+    {
+      "source": "concept-subscription-revenue",
+      "relation_type": "IS_A",
+      "target": "concept-financial-metric",
+      "description": "Subscription revenue is a financial performance metric."
+    },
+    {
+      "source": "concept-operating-margin-pressure",
+      "relation_type": "IS_A",
+      "target": "concept-risk-pressure",
+      "description": "Operating margin pressure is a risk/pressure concept."
+    },
+    {
+      "source": "concept-free-cash-flow-pressure",
+      "relation_type": "IS_A",
+      "target": "concept-risk-pressure",
+      "description": "Free cash flow pressure is a risk/pressure concept."
+    },
+    {
+      "source": "concept-supply-constraint",
+      "relation_type": "IS_A",
+      "target": "concept-risk-pressure",
+      "description": "Supply constraint is a risk/pressure concept."
+    },
+    {
+      "source": "concept-fx-impact",
+      "relation_type": "IS_A",
+      "target": "concept-risk-pressure",
+      "description": "Foreign exchange impact is a risk/pressure concept."
+    },
+    {
+      "source": "concept-power-cooling",
+      "relation_type": "CONSTRAINS",
+      "target": "concept-data-center-capacity",
+      "description": "Power and cooling constraints can limit data center deployment."
+    },
+    {
+      "source": "concept-supply-constraint",
+      "relation_type": "CONSTRAINS",
+      "target": "concept-data-center-capacity",
+      "description": "Supply constraints can limit data center and compute capacity growth."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "REQUIRES_CAPACITY",
+      "target": "concept-data-center-capacity",
+      "description": "AI workload demand requires data center and compute capacity."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "CREATES_DEMAND_FOR",
+      "target": "concept-accelerator-compute-vendor",
+      "description": "AI demand creates demand for accelerator and compute vendors."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "CREATES_DEMAND_FOR",
+      "target": "concept-networking-fabric",
+      "description": "AI demand creates demand for data center networking fabric."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "CREATES_DEMAND_FOR",
+      "target": "concept-memory-bandwidth",
+      "description": "AI demand creates demand for high-bandwidth memory and DRAM."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "CREATES_DEMAND_FOR",
+      "target": "concept-storage-capacity",
+      "description": "AI demand creates demand for storage and data infrastructure."
+    },
+    {
+      "source": "concept-cloud-platform-segment",
+      "relation_type": "MONETIZED_THROUGH",
+      "target": "concept-ai-product-monetization",
+      "description": "Cloud platforms monetize AI demand through services, workloads, and product adoption."
+    },
+    {
+      "source": "concept-hyperscaler-cloud",
+      "relation_type": "BUYER_OF",
+      "target": "concept-accelerator-compute-vendor",
+      "description": "Hyperscalers are major buyers of AI accelerators and compute capacity."
+    },
+    {
+      "source": "concept-hyperscaler-cloud",
+      "relation_type": "BUYER_OF",
+      "target": "concept-networking-provider",
+      "description": "Hyperscalers buy networking infrastructure for AI clusters and cloud data centers."
+    },
+    {
+      "source": "concept-hyperscaler-cloud",
+      "relation_type": "BUYER_OF",
+      "target": "concept-memory-storage-provider",
+      "description": "Hyperscalers buy memory and storage capacity for AI and cloud workloads."
+    },
+    {
+      "source": "concept-server-systems-provider",
+      "relation_type": "PACKAGES",
+      "target": "concept-accelerator-compute-vendor",
+      "description": "Server/system providers package accelerators into deployable AI systems."
+    },
+    {
+      "source": "concept-foundry-manufacturing",
+      "relation_type": "SUPPLIES_TO",
+      "target": "concept-accelerator-compute-vendor",
+      "description": "Foundry capacity supplies compute and accelerator vendors."
+    },
+    {
+      "source": "concept-semicap-equipment",
+      "relation_type": "ENABLES_CAPACITY_FOR",
+      "target": "concept-foundry-manufacturing",
+      "description": "Semiconductor equipment enables foundry and manufacturing capacity."
+    },
+    {
+      "source": "concept-infrastructure-capex",
+      "relation_type": "FUNDS",
+      "target": "concept-ai-infrastructure",
+      "description": "Infrastructure CapEx funds AI/cloud infrastructure capacity."
+    },
+    {
+      "source": "concept-ai-demand",
+      "relation_type": "DRIVES_SCHEMA",
+      "target": "concept-infrastructure-capex",
+      "description": "AI demand commonly drives infrastructure CapEx in earnings narratives."
+    },
+    {
+      "source": "concept-cloud-platform-segment",
+      "relation_type": "HAS_METRIC",
+      "target": "concept-backlog-rpo",
+      "description": "Cloud platform segments often report backlog/RPO as revenue visibility."
+    },
+    {
+      "source": "concept-cloud-platform-segment",
+      "relation_type": "HAS_METRIC",
+      "target": "concept-revenue-growth",
+      "description": "Cloud platform segments report revenue growth."
+    },
+    {
+      "source": "concept-infrastructure-capex",
+      "relation_type": "PRESSURES_MARGIN",
+      "target": "concept-operating-margin-pressure",
+      "description": "Infrastructure investment can create depreciation and operating cost pressure."
+    },
+    {
+      "source": "concept-infrastructure-capex",
+      "relation_type": "PRESSURES_CASH_FLOW",
+      "target": "concept-free-cash-flow-pressure",
+      "description": "Infrastructure investment can pressure free cash flow."
+    },
+    {
+      "source": "concept-component-cost-pressure",
+      "relation_type": "IS_A",
+      "target": "concept-risk-pressure",
+      "description": "Component and input cost pressure is a risk/pressure concept."
+    },
+    {
+      "source": "concept-regulatory-compliance-risk",
+      "relation_type": "IS_A",
+      "target": "concept-risk-pressure",
+      "description": "Regulatory and compliance risk is a risk/pressure concept."
+    },
+    {
+      "source": "concept-consumer-demand",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "Consumer demand is a demand/growth driver."
+    },
+    {
+      "source": "concept-pricing-power",
+      "relation_type": "IS_A",
+      "target": "concept-growth-demand",
+      "description": "Pricing power is a growth and margin driver."
+    },
+    {
+      "source": "concept-capital-allocation",
+      "relation_type": "IS_A",
+      "target": "concept-financial-metric",
+      "description": "Capital allocation and shareholder returns are financial/capital metrics."
+    },
+    {
+      "source": "concept-component-cost-pressure",
+      "relation_type": "PRESSURES_MARGIN",
+      "target": "concept-operating-margin-pressure",
+      "description": "Component and input costs can pressure gross or operating margin."
+    },
+    {
+      "source": "concept-pricing-power",
+      "relation_type": "SUPPORTS",
+      "target": "concept-revenue-growth",
+      "description": "Pricing power can support revenue growth."
+    },
+    {
+      "source": "concept-pricing-power",
+      "relation_type": "SUPPORTS",
+      "target": "concept-operating-margin-pressure",
+      "description": "Pricing power can offset margin pressure."
+    }
+  ]
+}

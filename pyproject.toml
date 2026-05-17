@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "earnings-call-graph"
+version = "0.1.0"
+description = "Graph-grounded earnings call narrative map for source-backed earnings intelligence."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "neo4j>=5.28,<7",
+  "pypdf>=5,<7",
+  "streamlit>=1.35,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+earnings-call-graph = "earnings_call_graph.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
