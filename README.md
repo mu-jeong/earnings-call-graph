@@ -23,9 +23,31 @@ AI Demand --DRIVES--> Custom silicon
 AI Infrastructure Solutions --DRIVES--> Product Revenue
 ```
 
-## Example
+## UI examples
 
-![Earnings Call Graph UI example](docs/example.png)
+### Graph exploration
+
+The Graph tab combines search/company/ontology filters, connected-chunk LLM overview, and an interactive relation graph.
+
+![Graph exploration UI](docs/web/graph.png)
+
+### Ask
+
+The Ask tab performs deterministic graph question answering. It can summarize matched referenced chunks with an LLM, then shows relation cards split into **Support / upside** and **Risk / pressure** columns with explicit ontology mappings and source evidence.
+
+![Ask tab source-grounded answer workflow](docs/web/ask.png)
+
+### Ask (Aura)
+
+The Ask (Aura) tab is a local tester for Aura-style graph tools: the user enters a question, the router selects the tool, and the app writes an answer from `Graph reasoning path` plus `Referenced chunk` rows.
+
+![Ask Aura routed graph-tool workflow](<docs/web/ask(aura).png>)
+
+### Key Nodes
+
+The Key Nodes tab ranks high-signal graph entities, shows selected-node relation evidence, and summarizes connected referenced chunks with an LLM.
+
+![Key Nodes selected-node evidence summary](docs/web/key_nodes.png)
 
 ## Demo scope
 
@@ -113,11 +135,12 @@ GEMINI_MODEL=gemini-2.5-flash
 streamlit run app.py
 ```
 
-The UI has three main tabs:
+The UI has four main tabs:
 
-1. **Graph** - explore entity/relation paths and ontology-grouped graph views.
-2. **Ask** - ask graph-backed questions using deterministic evidence matching, with optional read-only Text2Cypher.
-3. **Key Nodes** - inspect important entities and their source-backed relation paths.
+1. **Graph** - explore entity/relation paths and ontology-grouped graph views, with filters and an LLM graph overview from connected referenced chunks.
+2. **Ask** - ask graph-backed questions using deterministic evidence matching, then optionally summarize matched referenced chunks with an LLM.
+3. **Ask (Aura)** - test a local Neo4j Aura Agent-like workflow that mimics Aura graph-tool behavior with a LangGraph-style `router -> tool execution -> answer` orchestration pattern.
+4. **Key Nodes** - inspect important entities and their source-backed relation paths, then summarize connected referenced chunks with an LLM.
 
 ## Data workflow
 
@@ -184,35 +207,34 @@ earnings-call-graph sync --limit 8 --reset
 
 ## Aura Agent demo
 
-The Aura Agent demo uses curated read-only graph tools for:
+The Streamlit **Ask (Aura)** tab includes a local tester for Neo4j Aura
+Agent-style graph tools. Aura's agent tool behavior is mimicked in the web app
+with a LangGraph-style orchestration pattern: route the user question, execute
+the selected graph tool, then write an answer from the returned rows. This lets
+the same flow be tested locally before recreating it in Aura.
 
-- loaded company universe
-- positive AI infrastructure demand signals
-- company-specific AI deep dives
-- product-category evidence maps
-- ad-hoc graph exploration through Text2Cypher fallback
+- `loaded_company_universe`: fixed Cypher-template tool that lists loaded
+  companies.
+- `frequent_entities`: fixed Cypher-template tool that ranks frequently
+  mentioned non-company entities.
+- `ai_positive_demand_by_company`: Text2Cypher tool for cross-company positive
+  AI infrastructure demand signals.
+- `ai_risks_constraints_by_company`: Text2Cypher tool for cross-company AI
+  infrastructure risks, constraints, bottlenecks, and headwinds.
+- `company_ai_deep_dive`: Text2Cypher tool for one company's AI, product, and
+  data-center evidence paths.
+- `product_category_evidence_map`: Text2Cypher tool for mapping a requested
+  product category to company evidence.
 
-## TODO
-
-- Add the Aura Agent tools used in the demo to the repo documentation/config notes:
-  - `loaded_company_universe`
-  - `ai_positive_demand_by_company`
-  - `company_ai_deep_dive`
-  - `product_category_evidence_map`
-  - `ad_hoc_earnings_graph_query`
-  - optional Similarity Search over `MarkdownChunk.embedding`
-- Document exact Aura tool names, descriptions, parameters, and Cypher templates so the agent can be recreated from the repository.
-- Keep Similarity Search as an evidence-retrieval helper, not the primary structured graph-analysis tool.
+The tester now works like an agent: enter a question, let the router choose the
+best tool, then run it. The current UI does not expose manual tool override
+controls. For Text2Cypher tools, the tester generates or selects a tool-specific
+read-only Cypher query, validates it, runs it, and renders a source-grounded
+answer focused on company, graph reasoning path, and referenced transcript
+chunks.
 
 ## Tests
 
 ```powershell
 python -m pytest -q
 ```
-
-## Security notes
-
-- Do not commit `.env`.
-- Do not commit raw downloaded transcripts or local source caches.
-- Do not commit generated exports unless intentionally publishing a sanitized fixture.
-- Rotate credentials if they were ever copied into a public location.

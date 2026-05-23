@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import re
+from time import perf_counter
 from html import escape
 from typing import Any, Iterable
+from urllib.parse import quote
 
 import streamlit as st
 
@@ -122,6 +124,27 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--cf-line);
   border-radius: 8px;
   overflow: hidden;
+}
+div[data-testid="stMarkdown"] table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  display: table;
+}
+div[data-testid="stMarkdown"] th,
+div[data-testid="stMarkdown"] td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+div[data-testid="stMarkdown"] table code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .stAlert {
   background: var(--cf-bg-2);
@@ -275,6 +298,130 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.9rem;
   line-height: 1.5;
 }
+.cf-relation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.cf-relation-signal-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.cf-relation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.cf-relation-section + .cf-relation-section {
+  margin-top: 1rem;
+}
+.cf-relation-section-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.cf-relation-section-title {
+  color: var(--cf-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cf-relation-section-title.support {
+  color: #8CE0C0;
+}
+.cf-relation-section-title.risk {
+  color: #FDBA74;
+}
+.cf-relation-section-title.neutral {
+  color: var(--cf-muted);
+}
+.cf-relation-section-count {
+  color: var(--cf-dim);
+  font-size: 0.74rem;
+}
+.cf-relation-section-sub {
+  color: var(--cf-dim);
+  font-size: 0.74rem;
+  line-height: 1.4;
+  margin-top: -0.3rem;
+}
+.cf-relation-card {
+  background: var(--cf-bg-1);
+  border: 1px solid var(--cf-line);
+  border-left: 3px solid var(--cf-line-2);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  color: var(--cf-fg);
+}
+.cf-relation-card.support {
+  border-left-color: #27B884;
+}
+.cf-relation-card.risk {
+  border-left-color: #F97316;
+}
+.cf-relation-meta {
+  align-items: center;
+  color: var(--cf-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  margin-bottom: 0.45rem;
+}
+.cf-relation-badge {
+  border: 1px solid var(--cf-line-2);
+  border-radius: 999px;
+  color: var(--cf-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  padding: 0.12rem 0.42rem;
+  text-transform: uppercase;
+}
+.cf-relation-badge.support {
+  background: rgba(39, 184, 132, 0.14);
+  border-color: rgba(39, 184, 132, 0.58);
+}
+.cf-relation-badge.risk {
+  background: rgba(249, 115, 22, 0.14);
+  border-color: rgba(249, 115, 22, 0.62);
+}
+.cf-relation-path {
+  color: var(--cf-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin-bottom: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.cf-relation-ontology {
+  color: var(--cf-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin: -0.15rem 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+.cf-relation-evidence {
+  color: var(--cf-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-bottom: 0.35rem;
+}
+.cf-relation-foot {
+  color: var(--cf-dim);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+@media (max-width: 860px) {
+  .cf-relation-signal-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .cf-chunk-text {
   background: var(--cf-bg-2);
   border: 1px solid var(--cf-line);
@@ -331,6 +478,103 @@ ASK_QUESTION_PRESETS = [
     "Which risks are connected to infrastructure investment?",
 ]
 CUSTOM_QUESTION_LABEL = "Custom question"
+APP_TAB_LABELS = ["Graph", "Ask", "Ask (Aura)", "Key Nodes"]
+AURA_TEXT2CYPHER_TOOL_NAMES = {
+    "ai_positive_demand_by_company",
+    "ai_risks_constraints_by_company",
+    "company_ai_deep_dive",
+    "product_category_evidence_map",
+}
+AURA_DETERMINISTIC_TEXT2CYPHER_TOOL_NAMES = {
+    "ai_positive_demand_by_company",
+    "ai_risks_constraints_by_company",
+    "company_ai_deep_dive",
+    "product_category_evidence_map",
+}
+AURA_CROSS_COMPANY_TOOL_NAMES = {
+    "ai_positive_demand_by_company",
+    "ai_risks_constraints_by_company",
+    "product_category_evidence_map",
+}
+AURA_TOOL_PRESETS = {
+    "loaded_company_universe": "Which companies are currently loaded in the earnings-call graph?",
+    "frequent_entities": "What are the most frequently mentioned entities across the loaded earnings-call graph?",
+    "ai_positive_demand_by_company": "Across the loaded earnings-call graph, what positive demand signals are companies reporting for the AI infrastructure industry?",
+    "ai_risks_constraints_by_company": "Across the loaded earnings-call graph, what risks or constraints are companies reporting for AI infrastructure growth?",
+    "company_ai_deep_dive": "For NVIDIA, what does the earnings-call graph show about AI demand, Blackwell, and data center revenue growth?",
+    "product_category_evidence_map": "Across the loaded graph, summarize company evidence for the AI accelerator product category.",
+}
+AURA_TOOL_DEFINITIONS = {
+    "loaded_company_universe": {
+        "label": "loaded_company_universe",
+        "tool_type": "cypher_template",
+        "description": "List companies currently loaded in the graph before cross-company analysis.",
+        "requires_question": False,
+        "supports_company": False,
+        "uses_llm": False,
+    },
+    "frequent_entities": {
+        "label": "frequent_entities",
+        "tool_type": "cypher_template",
+        "description": "Rank the most frequently mentioned non-company entities across loaded earnings-call chunks and relation facts.",
+        "requires_question": False,
+        "supports_company": False,
+        "uses_llm": False,
+    },
+    "ai_positive_demand_by_company": {
+        "label": "ai_positive_demand_by_company",
+        "tool_type": "text2cypher",
+        "description": "Use Text2Cypher to find company-by-company positive demand signals for AI infrastructure.",
+        "requires_question": True,
+        "supports_company": False,
+        "uses_llm": True,
+        "answer_title": "Company-by-company referenced chunks",
+    },
+    "ai_risks_constraints_by_company": {
+        "label": "ai_risks_constraints_by_company",
+        "tool_type": "text2cypher",
+        "description": "Use Text2Cypher to find company-by-company risks, bottlenecks, or constraints for AI infrastructure growth.",
+        "requires_question": True,
+        "supports_company": False,
+        "uses_llm": True,
+        "answer_title": "Company-by-company risk and constraint chunks",
+    },
+    "company_ai_deep_dive": {
+        "label": "company_ai_deep_dive",
+        "tool_type": "text2cypher",
+        "description": "Use Text2Cypher to retrieve one company's AI, product, and data-center source chunks.",
+        "requires_question": True,
+        "supports_company": False,
+        "uses_llm": True,
+        "answer_title": "Company AI Deep Dive",
+    },
+    "product_category_evidence_map": {
+        "label": "product_category_evidence_map",
+        "tool_type": "text2cypher",
+        "description": "Use Text2Cypher to map a requested product category to company chunks and graph paths.",
+        "requires_question": True,
+        "supports_company": False,
+        "uses_llm": True,
+        "answer_title": "Company-by-company product chunks",
+    },
+}
+AURA_TOOL_MARKDOWN_SCHEMA = {
+    "type": "object",
+    "properties": {"markdown": {"type": "string"}},
+    "required": ["markdown"],
+}
+AURA_TOOL_ROUTER_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "tool_name": {
+            "type": "string",
+            "enum": list(AURA_TOOL_DEFINITIONS),
+        },
+        "rationale": {"type": "string"},
+        "normalized_question": {"type": "string"},
+    },
+    "required": ["tool_name", "rationale", "normalized_question"],
+}
 ONTOLOGY_SUMMARY_SCHEMA = {
     "type": "object",
     "properties": {
@@ -345,6 +589,14 @@ ONTOLOGY_SUMMARY_SYSTEM = (
     "You summarize earnings-call evidence chunks for an investment research graph. "
     "Be concise, source-grounded, and avoid claiming more than the chunks support."
 )
+AURA_TOOL_ANSWER_SYSTEM = (
+    "You turn earnings-call graph tool output into a concise user-facing answer. "
+    "Use only the provided tool output, preserve company differences, and do not include evidence-gap or caveat sections."
+)
+AURA_TOOL_ROUTER_SYSTEM = (
+    "You route a user question to exactly one available earnings-call graph tool. "
+    "Choose the narrowest tool that answers the question. Return only structured JSON."
+)
 GRAPH_CHUNK_SUMMARY_SYSTEM = (
     "You summarize earnings-call source chunks for an investment research graph. "
     "Use only the provided chunks and graph paths. Keep the answer concise, source-grounded, "
@@ -357,6 +609,9 @@ CONNECTED_NODE_SUMMARY_SYSTEM = (
 )
 ONTOLOGY_HIERARCHY_RELATIONS = {"IS_A", "PART_OF"}
 TEXT2CYPHER_MAX_LIMIT = 50
+AURA_TEXT2CYPHER_MAX_LIMIT = 250
+AURA_TEXT2CYPHER_QUERY_TIMEOUT_SECONDS = 15.0
+NEO4J_QUERY_TIMEOUT_SECONDS = 30.0
 TEXT2CYPHER_SCHEMA = {
     "type": "object",
     "properties": {
@@ -381,6 +636,9 @@ TEXT2CYPHER_FORBIDDEN_PATTERN = re.compile(
     re.IGNORECASE,
 )
 TEXT2CYPHER_LIMIT_PATTERN = re.compile(r"\bLIMIT\s+(\d+)\b", re.IGNORECASE)
+TEXT2CYPHER_REVERSED_LIST_COMPREHENSION_PATTERN = re.compile(
+    r"\[([A-Za-z_]\w*)\.([A-Za-z_]\w*)\s*\|\s*\1\s+IN\s+([^\]]+)\]"
+)
 
 TEXT2CYPHER_GRAPH_SCHEMA = """
 Node labels and key properties:
@@ -422,14 +680,21 @@ LIMIT 25
 """.strip()
 
 
-@st.cache_data(ttl=60)
-def neo4j_query(cypher: str, params: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]], str | None]:
+@st.cache_data(ttl=600, show_spinner=False)
+def neo4j_query(
+    cypher: str,
+    params: dict[str, Any] | None = None,
+    timeout_seconds: float | None = NEO4J_QUERY_TIMEOUT_SECONDS,
+) -> tuple[list[dict[str, Any]], str | None]:
     graph = None
     try:
+        from neo4j import Query
+
         graph = graph_from_env()
         graph.verify_connectivity()
         with graph.driver.session(database=graph.database) as session:
-            return session.run(cypher, params or {}).data(), None
+            query = Query(cypher, timeout=timeout_seconds) if timeout_seconds else cypher
+            return session.run(query, params or {}).data(), None
     except Exception as exc:
         return [], str(exc)
     finally:
@@ -467,6 +732,11 @@ def validate_text2cypher(cypher: str, *, max_limit: int = TEXT2CYPHER_MAX_LIMIT)
         cleaned = re.sub(r"^```(?:cypher)?", "", cleaned, flags=re.IGNORECASE).strip()
         cleaned = re.sub(r"```$", "", cleaned).strip()
     cleaned = cleaned.rstrip(";").strip()
+    warnings: list[str] = []
+    normalized = TEXT2CYPHER_REVERSED_LIST_COMPREHENSION_PATTERN.sub(r"[\1 IN \3 | \1.\2]", cleaned)
+    if normalized != cleaned:
+        cleaned = normalized
+        warnings.append("Normalized Cypher list-comprehension syntax.")
     compact = re.sub(r"\s+", " ", cleaned)
     if not compact:
         raise ValueError("Generated Cypher was empty.")
@@ -486,12 +756,30 @@ def validate_text2cypher(cypher: str, *, max_limit: int = TEXT2CYPHER_MAX_LIMIT)
     if not limit_match:
         raise ValueError("Generated Cypher must include LIMIT.")
 
-    warnings: list[str] = []
     limit_value = int(limit_match.group(1))
     if limit_value > max_limit:
         compact = TEXT2CYPHER_LIMIT_PATTERN.sub(f"LIMIT {max_limit}", compact, count=1)
         warnings.append(f"LIMIT was capped from {limit_value} to {max_limit}.")
     return compact, warnings
+
+
+def safe_aura_text2cypher_limit(limit: int | float | str | None) -> int:
+    try:
+        requested = int(limit or TEXT2CYPHER_MAX_LIMIT)
+    except (TypeError, ValueError):
+        requested = TEXT2CYPHER_MAX_LIMIT
+    return min(max(1, requested), AURA_TEXT2CYPHER_MAX_LIMIT)
+
+
+def aura_tool_limit(tool_type: str, *, max_company_rows: int, max_relation_rows: int) -> int:
+    requested = max_company_rows if tool_type == "cypher_template" else max_relation_rows
+    try:
+        limit = max(1, int(requested or 1))
+    except (TypeError, ValueError):
+        limit = 1
+    if tool_type == "text2cypher":
+        return safe_aura_text2cypher_limit(limit)
+    return limit
 
 
 def generate_text2cypher(question: str) -> dict[str, Any]:
@@ -523,16 +811,17 @@ def run_text2cypher_question(question: str) -> tuple[dict[str, Any] | None, str 
     return {**generated, "rows": rows}, None
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def graph_counts() -> tuple[list[dict[str, Any]], str | None]:
     return neo4j_query(
         """
-        CALL {
+        WITH $labels AS allowed_labels
+        CALL (allowed_labels) {
         MATCH (n)
-        WHERE any(label IN labels(n) WHERE label IN $labels)
+        WHERE any(label IN labels(n) WHERE label IN allowed_labels)
         UNWIND labels(n) AS label
         WITH label, count(*) AS count
-        WHERE label IN $labels
+        WHERE label IN allowed_labels
         RETURN label, count
         UNION ALL
         MATCH (call:EarningsCall)
@@ -559,7 +848,7 @@ def graph_counts() -> tuple[list[dict[str, Any]], str | None]:
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def source_document_rows() -> tuple[list[dict[str, Any]], str | None]:
     return neo4j_query(
         """
@@ -578,7 +867,81 @@ def source_document_rows() -> tuple[list[dict[str, Any]], str | None]:
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
+def loaded_company_universe_rows(limit: int = 50) -> tuple[list[dict[str, Any]], str | None]:
+    return neo4j_query(
+        """
+        MATCH (company:Company)
+        OPTIONAL MATCH (company)-[:HELD_CALL]->(call:EarningsCall)
+        OPTIONAL MATCH (call)-[:IN_PERIOD]->(period:FiscalPeriod)
+        OPTIONAL MATCH (source_doc:SourceDocument)-[:SOURCE_FOR]->(call)
+        OPTIONAL MATCH (source_doc)-[:HAS_CHUNK]->(chunk:MarkdownChunk)
+        OPTIONAL MATCH (fact:RelationFact)-[:SUPPORTED_BY]->(chunk)
+        RETURN company.name AS company,
+               company.ticker AS ticker,
+               collect(DISTINCT period.label) AS fiscal_periods,
+               count(DISTINCT source_doc) AS source_documents,
+               count(DISTINCT chunk) AS chunks,
+               count(DISTINCT fact) AS relation_facts
+        ORDER BY company
+        LIMIT $limit
+        """,
+        {"limit": limit},
+    )
+
+
+@st.cache_data(ttl=600)
+def frequent_entity_rows(limit: int = 30) -> tuple[list[dict[str, Any]], str | None]:
+    return neo4j_query(
+        """
+        MATCH (entity:Entity)
+        WHERE coalesce(entity.entity_type, '') <> 'Company'
+        CALL (entity) {
+          OPTIONAL MATCH (chunk:MarkdownChunk)-[:MENTIONS_ENTITY]->(entity)
+          OPTIONAL MATCH (chunk)<-[:HAS_CHUNK]-(source_doc:SourceDocument)-[:ABOUT_COMPANY]->(company:Company)
+          RETURN count(DISTINCT chunk) AS direct_chunk_mentions,
+                 collect(DISTINCT company.name) AS direct_companies,
+                 count(DISTINCT chunk) AS direct_evidence_count
+        }
+        CALL (entity) {
+          OPTIONAL MATCH (entity)<-[:FROM_ENTITY|TO_ENTITY]-(fact:RelationFact)
+          OPTIONAL MATCH (fact)-[:SUPPORTED_BY]->(fact_chunk:MarkdownChunk)<-[:HAS_CHUNK]-(fact_doc:SourceDocument)-[:ABOUT_COMPANY]->(fact_company:Company)
+          RETURN count(DISTINCT fact) AS relation_mentions,
+                 collect(DISTINCT fact_company.name) AS relation_companies,
+                 count(DISTINCT fact_chunk) AS relation_evidence_count
+        }
+        CALL (entity) {
+          OPTIONAL MATCH (entity)-[:MAPS_TO]->(concept:OntologyConcept)
+          RETURN collect(DISTINCT concept.name) AS concepts
+        }
+        WITH entity, direct_chunk_mentions, relation_mentions,
+             [name IN direct_companies + relation_companies WHERE name IS NOT NULL] AS companies,
+             direct_evidence_count + relation_evidence_count AS evidence_count,
+             concepts
+        WITH entity, direct_chunk_mentions, relation_mentions,
+             reduce(unique_companies = [], name IN companies |
+               CASE WHEN name IN unique_companies THEN unique_companies ELSE unique_companies + name END
+             ) AS unique_companies,
+             evidence_count,
+             concepts
+        WHERE direct_chunk_mentions + relation_mentions > 0
+        RETURN entity.name AS entity,
+               entity.entity_type AS entity_type,
+               direct_chunk_mentions AS direct_chunk_mentions,
+               relation_mentions AS relation_mentions,
+               direct_chunk_mentions + relation_mentions AS mention_count,
+               size(unique_companies) AS company_count,
+               unique_companies[0..6] AS sample_companies,
+               evidence_count AS evidence_count,
+               concepts[0..6] AS concepts
+        ORDER BY mention_count DESC, company_count DESC, evidence_count DESC, entity ASC
+        LIMIT $limit
+        """,
+        {"limit": limit},
+    )
+
+
+@st.cache_data(ttl=600)
 def company_options() -> tuple[list[dict[str, Any]], str | None]:
     return neo4j_query(
         """
@@ -593,7 +956,7 @@ def company_options() -> tuple[list[dict[str, Any]], str | None]:
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def relation_fact_rows(search: str = "", limit: int = 100, company_ticker: str = "") -> tuple[list[dict[str, Any]], str | None]:
     terms = query_terms(search)
     return neo4j_query(
@@ -611,12 +974,12 @@ def relation_fact_rows(search: str = "", limit: int = 100, company_ticker: str =
              [term IN $terms WHERE
                 toLower(src.name) CONTAINS term
              OR toLower(coalesce(src.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(src.value, '')) CONTAINS term
-             OR toLower(coalesce(src.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['context']), '')) CONTAINS term
              OR toLower(dst.name) CONTAINS term
              OR toLower(coalesce(dst.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(dst.value, '')) CONTAINS term
-             OR toLower(coalesce(dst.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['context']), '')) CONTAINS term
              OR any(name IN source_concepts WHERE toLower(name) CONTAINS term)
              OR any(name IN target_concepts WHERE toLower(name) CONTAINS term)
              OR any(description IN source_concept_descriptions WHERE toLower(description) CONTAINS term)
@@ -637,14 +1000,14 @@ def relation_fact_rows(search: str = "", limit: int = 100, company_ticker: str =
                src.id AS source_id,
                src.name AS source,
                src.entity_type AS source_type,
-               CASE WHEN src.value IS NULL AND src.context IS NULL THEN {} ELSE src { .value, .context } END AS source_properties,
+               CASE WHEN properties(src)['value'] IS NULL AND properties(src)['context'] IS NULL THEN {} ELSE {value: properties(src)['value'], context: properties(src)['context']} END AS source_properties,
                source_concepts AS source_concepts,
                fact.relation_type AS relation,
                coalesce(fact.layer, 'coverage') AS relation_layer,
                dst.id AS target_id,
                dst.name AS target,
                dst.entity_type AS target_type,
-               CASE WHEN dst.value IS NULL AND dst.context IS NULL THEN {} ELSE dst { .value, .context } END AS target_properties,
+               CASE WHEN properties(dst)['value'] IS NULL AND properties(dst)['context'] IS NULL THEN {} ELSE {value: properties(dst)['value'], context: properties(dst)['context']} END AS target_properties,
                target_concepts AS target_concepts,
                matched_terms AS matched_terms,
                fact.evidence_text AS evidence,
@@ -661,7 +1024,7 @@ def relation_fact_rows(search: str = "", limit: int = 100, company_ticker: str =
 
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def balanced_relation_fact_rows(search: str = "", limit: int = 100) -> tuple[list[dict[str, Any]], str | None]:
     """Return relation rows in company round-robin order for the Graph tab.
 
@@ -685,12 +1048,12 @@ def balanced_relation_fact_rows(search: str = "", limit: int = 100) -> tuple[lis
              [term IN $terms WHERE
                 toLower(src.name) CONTAINS term
              OR toLower(coalesce(src.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(src.value, '')) CONTAINS term
-             OR toLower(coalesce(src.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['context']), '')) CONTAINS term
              OR toLower(dst.name) CONTAINS term
              OR toLower(coalesce(dst.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(dst.value, '')) CONTAINS term
-             OR toLower(coalesce(dst.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['context']), '')) CONTAINS term
              OR any(name IN source_concepts WHERE toLower(name) CONTAINS term)
              OR any(name IN target_concepts WHERE toLower(name) CONTAINS term)
              OR any(description IN source_concept_descriptions WHERE toLower(description) CONTAINS term)
@@ -711,14 +1074,14 @@ def balanced_relation_fact_rows(search: str = "", limit: int = 100) -> tuple[lis
                source_id: src.id,
                source: src.name,
                source_type: src.entity_type,
-               source_properties: CASE WHEN src.value IS NULL AND src.context IS NULL THEN {} ELSE src { .value, .context } END,
+               source_properties: CASE WHEN properties(src)['value'] IS NULL AND properties(src)['context'] IS NULL THEN {} ELSE {value: properties(src)['value'], context: properties(src)['context']} END,
                source_concepts: source_concepts,
                relation: fact.relation_type,
                relation_layer: coalesce(fact.layer, 'coverage'),
                target_id: dst.id,
                target: dst.name,
                target_type: dst.entity_type,
-               target_properties: CASE WHEN dst.value IS NULL AND dst.context IS NULL THEN {} ELSE dst { .value, .context } END,
+               target_properties: CASE WHEN properties(dst)['value'] IS NULL AND properties(dst)['context'] IS NULL THEN {} ELSE {value: properties(dst)['value'], context: properties(dst)['context']} END,
                target_concepts: target_concepts,
                matched_terms: matched_terms,
                evidence: fact.evidence_text,
@@ -769,7 +1132,7 @@ def balanced_relation_fact_rows(search: str = "", limit: int = 100) -> tuple[lis
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def relation_fact_count(search: str = "", company_ticker: str = "") -> tuple[int, str | None]:
     terms = query_terms(search)
     rows, error = neo4j_query(
@@ -787,12 +1150,12 @@ def relation_fact_count(search: str = "", company_ticker: str = "") -> tuple[int
              [term IN $terms WHERE
                 toLower(src.name) CONTAINS term
              OR toLower(coalesce(src.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(src.value, '')) CONTAINS term
-             OR toLower(coalesce(src.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['context']), '')) CONTAINS term
              OR toLower(dst.name) CONTAINS term
              OR toLower(coalesce(dst.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(dst.value, '')) CONTAINS term
-             OR toLower(coalesce(dst.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['context']), '')) CONTAINS term
              OR any(name IN source_concepts WHERE toLower(name) CONTAINS term)
              OR any(name IN target_concepts WHERE toLower(name) CONTAINS term)
              OR any(description IN source_concept_descriptions WHERE toLower(description) CONTAINS term)
@@ -814,7 +1177,7 @@ def relation_fact_count(search: str = "", company_ticker: str = "") -> tuple[int
     return int(rows[0].get("count", 0)) if rows else 0, None
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def connected_node_summary_rows(
     search: str = "",
     limit: int = 15,
@@ -840,12 +1203,12 @@ def connected_node_summary_rows(
              [term IN $terms WHERE
                 toLower(src.name) CONTAINS term
              OR toLower(coalesce(src.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(src.value, '')) CONTAINS term
-             OR toLower(coalesce(src.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(src)['context']), '')) CONTAINS term
              OR toLower(dst.name) CONTAINS term
              OR toLower(coalesce(dst.canonical_name, '')) CONTAINS term
-             OR toLower(coalesce(dst.value, '')) CONTAINS term
-             OR toLower(coalesce(dst.context, '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['value']), '')) CONTAINS term
+             OR toLower(coalesce(toString(properties(dst)['context']), '')) CONTAINS term
              OR any(name IN source_concepts WHERE toLower(name) CONTAINS term)
              OR any(name IN target_concepts WHERE toLower(name) CONTAINS term)
              OR any(description IN source_concept_descriptions WHERE toLower(description) CONTAINS term)
@@ -877,14 +1240,14 @@ def connected_node_summary_rows(
                source_id: src.id,
                source: src.name,
                source_type: src.entity_type,
-               source_properties: CASE WHEN src.value IS NULL AND src.context IS NULL THEN {} ELSE src { .value, .context } END,
+               source_properties: CASE WHEN properties(src)['value'] IS NULL AND properties(src)['context'] IS NULL THEN {} ELSE {value: properties(src)['value'], context: properties(src)['context']} END,
                source_concepts: source_concepts,
                relation: fact.relation_type,
                relation_layer: coalesce(fact.layer, 'coverage'),
                target_id: dst.id,
                target: dst.name,
                target_type: dst.entity_type,
-               target_properties: CASE WHEN dst.value IS NULL AND dst.context IS NULL THEN {} ELSE dst { .value, .context } END,
+               target_properties: CASE WHEN properties(dst)['value'] IS NULL AND properties(dst)['context'] IS NULL THEN {} ELSE {value: properties(dst)['value'], context: properties(dst)['context']} END,
                target_concepts: target_concepts,
                matched_terms: matched_terms,
                evidence: fact.evidence_text,
@@ -1031,7 +1394,7 @@ def filter_payload_by_min_node_degree(
     }
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def graph_payload(search: str = "", limit: int = 100, company_ticker: str = "") -> tuple[dict[str, list[dict[str, Any]]], str | None]:
     if company_ticker:
         rows, error = relation_fact_rows(search, limit, company_ticker)
@@ -1090,13 +1453,13 @@ def add_company_context_node(
 
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def ontology_relation_rows(search: str = "", limit: int = 100, company_ticker: str = "") -> tuple[list[dict[str, Any]], str | None]:
     terms = query_terms(search)
     return neo4j_query(
         """
-        CALL {
-          WITH $terms AS terms, $company_ticker AS company_ticker
+        WITH $terms AS terms, $company_ticker AS company_ticker
+        CALL (terms, company_ticker) {
           MATCH (fact:RelationFact)-[:FROM_ENTITY]->(src:Entity)-[:MAPS_TO]->(src_concept:OntologyConcept),
                 (fact)-[:TO_ENTITY]->(dst:Entity)-[:MAPS_TO]->(dst_concept:OntologyConcept)
           WITH fact, src, dst, src_concept, dst_concept, company_ticker,
@@ -1146,7 +1509,7 @@ def ontology_relation_rows(search: str = "", limit: int = 100, company_ticker: s
                  '' AS chunk_preview,
                  '' AS chunk_text
           UNION
-          WITH $terms AS terms, $company_ticker AS company_ticker
+          WITH terms, company_ticker
           MATCH (src_concept:OntologyConcept)-[schema_rel]->(dst_concept:OntologyConcept)
           WHERE coalesce(schema_rel.layer, '') = 'ontology_schema'
           OPTIONAL MATCH (company:Company {ticker: company_ticker})<-[:ABOUT_COMPANY]-(:SourceDocument)-[:HAS_CHUNK]->(:MarkdownChunk)<-[:SUPPORTED_BY]-(:RelationFact)-[:FROM_ENTITY|TO_ENTITY]->(:Entity)-[:MAPS_TO]->(mapped_concept:OntologyConcept)
@@ -1207,7 +1570,7 @@ def ontology_relation_rows(search: str = "", limit: int = 100, company_ticker: s
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def ontology_relation_count(search: str = "", company_ticker: str = "") -> tuple[int, str | None]:
     rows, error = ontology_relation_rows(search, limit=10000, company_ticker=company_ticker)
     if error:
@@ -1222,7 +1585,7 @@ def graph_result_count(graph_view: str, search: str = "", company_ticker: str = 
         return ontology_relation_count(search, company_ticker)
     return relation_fact_count(search, company_ticker)
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def ontology_graph_payload(search: str = "", limit: int = 100, company_ticker: str = "") -> tuple[dict[str, list[dict[str, Any]]], str | None]:
     rows, error = ontology_relation_rows(search, limit, company_ticker)
     if error:
@@ -1230,7 +1593,7 @@ def ontology_graph_payload(search: str = "", limit: int = 100, company_ticker: s
     return relation_rows_to_graph(rows), None
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def ontology_concept_options() -> tuple[list[dict[str, Any]], str | None]:
     return neo4j_query(
         """
@@ -1252,13 +1615,12 @@ def ontology_concept_options() -> tuple[list[dict[str, Any]], str | None]:
     )
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def ontology_concept_context(concept_id: str, limit: int = 80) -> tuple[dict[str, list[dict[str, Any]]], str | None]:
     rows, error = neo4j_query(
         """
         MATCH (concept:OntologyConcept {id: $concept_id})
-        CALL {
-          WITH concept
+        CALL (concept) {
           OPTIONAL MATCH (concept)-[outgoing]->(target:OntologyConcept)
           WHERE outgoing.layer = 'ontology_schema'
           RETURN collect({
@@ -1269,8 +1631,7 @@ def ontology_concept_context(concept_id: str, limit: int = 80) -> tuple[dict[str
             description: coalesce(outgoing.description, '')
           }) AS outgoing_rows
         }
-        CALL {
-          WITH concept
+        CALL (concept) {
           OPTIONAL MATCH (source:OntologyConcept)-[incoming]->(concept)
           WHERE incoming.layer = 'ontology_schema'
           RETURN collect({
@@ -1281,8 +1642,7 @@ def ontology_concept_context(concept_id: str, limit: int = 80) -> tuple[dict[str
             description: coalesce(incoming.description, '')
           }) AS incoming_rows
         }
-        CALL {
-          WITH concept
+        CALL (concept) {
           OPTIONAL MATCH (entity:Entity)-[mapped:MAPS_TO]->(concept)
           OPTIONAL MATCH (entity)<-[:FROM_ENTITY|TO_ENTITY]-(fact:RelationFact)
           OPTIONAL MATCH (fact)-[:SUPPORTED_BY]->(:MarkdownChunk)<-[:HAS_CHUNK]-(source_doc:SourceDocument)-[:ABOUT_COMPANY]->(company:Company)
@@ -1297,8 +1657,7 @@ def ontology_concept_context(concept_id: str, limit: int = 80) -> tuple[dict[str
             companies: companies
           })[0..$limit] AS entity_rows
         }
-        CALL {
-          WITH concept
+        CALL (concept) {
           OPTIONAL MATCH (entity:Entity)-[:MAPS_TO]->(concept)
           OPTIONAL MATCH (fact:RelationFact)-[:FROM_ENTITY|TO_ENTITY]->(entity)
           OPTIONAL MATCH (fact)-[:FROM_ENTITY]->(src:Entity)
@@ -1346,7 +1705,7 @@ def ontology_concept_context(concept_id: str, limit: int = 80) -> tuple[dict[str
     }, None
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def ontology_concept_chunks(concept_id: str, limit: int = 16, company_ticker: str = "") -> tuple[dict[str, Any], str | None]:
     rows, error = neo4j_query(
         """
@@ -1458,7 +1817,7 @@ def ontology_click_bridge_value() -> dict[str, Any]:
     return {"node_id": node_id} if node_id else {}
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def key_node_rows(limit: int = 30) -> tuple[list[dict[str, Any]], str | None]:
     return neo4j_query(
         """
@@ -1486,13 +1845,13 @@ def key_node_rows(limit: int = 30) -> tuple[list[dict[str, Any]], str | None]:
                WHEN 'BusinessSegment' THEN 5
                ELSE 1
              END AS type_weight,
-             CASE WHEN entity.value IS NULL THEN 0 ELSE 3 END +
-             CASE WHEN entity.context IS NULL THEN 0 ELSE 1 END +
+             CASE WHEN properties(entity)['value'] IS NULL THEN 0 ELSE 3 END +
+             CASE WHEN properties(entity)['context'] IS NULL THEN 0 ELSE 1 END +
              (size(concepts) * 2) AS property_weight
         RETURN entity.id AS node_id,
                entity.name AS name,
                entity.entity_type AS entity_type,
-               CASE WHEN entity.value IS NULL AND entity.context IS NULL THEN {} ELSE entity { .value, .context } END AS properties,
+               CASE WHEN properties(entity)['value'] IS NULL AND properties(entity)['context'] IS NULL THEN {} ELSE {value: properties(entity)['value'], context: properties(entity)['context']} END AS properties,
                concepts,
                relation_count,
                insight_count,
@@ -1506,7 +1865,7 @@ def key_node_rows(limit: int = 30) -> tuple[list[dict[str, Any]], str | None]:
         {"limit": limit},
     )
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def node_context_rows(node_id: str, limit: int = 30) -> tuple[list[dict[str, Any]], str | None]:
     return neo4j_query(
         """
@@ -1525,17 +1884,17 @@ def node_context_rows(node_id: str, limit: int = 30) -> tuple[list[dict[str, Any
         RETURN entity.id AS node_id,
                entity.name AS node_name,
                entity.entity_type AS node_type,
-               CASE WHEN entity.value IS NULL AND entity.context IS NULL THEN {} ELSE entity { .value, .context } END AS node_properties,
+               CASE WHEN properties(entity)['value'] IS NULL AND properties(entity)['context'] IS NULL THEN {} ELSE {value: properties(entity)['value'], context: properties(entity)['context']} END AS node_properties,
                node_concepts,
                src.name AS source,
                src.entity_type AS source_type,
-               CASE WHEN src.value IS NULL AND src.context IS NULL THEN {} ELSE src { .value, .context } END AS source_properties,
+               CASE WHEN properties(src)['value'] IS NULL AND properties(src)['context'] IS NULL THEN {} ELSE {value: properties(src)['value'], context: properties(src)['context']} END AS source_properties,
                source_concepts,
                fact.relation_type AS relation,
                coalesce(fact.layer, 'coverage') AS relation_layer,
                dst.name AS target,
                dst.entity_type AS target_type,
-               CASE WHEN dst.value IS NULL AND dst.context IS NULL THEN {} ELSE dst { .value, .context } END AS target_properties,
+               CASE WHEN properties(dst)['value'] IS NULL AND properties(dst)['context'] IS NULL THEN {} ELSE {value: properties(dst)['value'], context: properties(dst)['context']} END AS target_properties,
                target_concepts,
                fact.evidence_text AS evidence,
                fact.confidence AS confidence,
@@ -1956,20 +2315,21 @@ def render_interactive_graph(
     open_selected_details: bool = False,
     viewport: dict[str, Any] | None = None,
 ) -> str:
-    st.components.v1.html(
-        interactive_graph_html(
-            payload,
-            height=height,
-            max_edges=max_edges,
-            hierarchical=hierarchical,
-            min_node_degree=min_node_degree,
-            selected_node_id=selected_node_id,
-            sync_ontology_selection=sync_ontology_selection,
-            open_selected_details=open_selected_details,
-            viewport=viewport,
-        ),
+    html = interactive_graph_html(
+        payload,
         height=height,
+        max_edges=max_edges,
+        hierarchical=hierarchical,
+        min_node_degree=min_node_degree,
+        selected_node_id=selected_node_id,
+        sync_ontology_selection=sync_ontology_selection,
+        open_selected_details=open_selected_details,
+        viewport=viewport,
     )
+    if hasattr(st, "iframe"):
+        st.iframe(f"data:text/html;charset=utf-8,{quote(html)}", height=height)
+    else:
+        st.components.v1.html(html, height=height)
     return selected_node_id
 
 
@@ -2055,7 +2415,7 @@ def answer_question_from_relations(question: str, rows: list[dict[str, Any]]) ->
     company_focus = _company_breakdown(ranked)
     property_bits = []
     if concepts:
-        property_bits.append(f"Concepts: {', '.join(concepts)}")
+        property_bits.append(f"Ontology: {', '.join(concepts)}")
     if values:
         property_bits.append(f"Metric/property values: {', '.join(values)}")
     if company_focus:
@@ -2067,6 +2427,1531 @@ def answer_question_from_relations(question: str, rows: list[dict[str, Any]]) ->
         "property_insights": " | ".join(property_bits) if property_bits else "No explicit metric values or ontology mappings were present in the matched rows.",
         "basis": f"Companies: {', '.join(companies) if companies else 'n/a'}. Ranking uses insight layer, matched terms, MetricValue/BusinessOutcome nodes, entity value/context properties, and ontology concept mappings.",
     }
+
+
+def relation_signal(row: dict[str, Any]) -> tuple[str, str]:
+    relation = str(row.get("relation") or "").strip().upper()
+    if relation in BULLISH_RELATIONS:
+        return "support", "Support"
+    if relation in RISK_RELATIONS:
+        return "risk", "Risk / pressure"
+    return "neutral", "Relation"
+
+
+def ask_relation_card_items(rows: Iterable[dict[str, Any]], *, limit: int = 12) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    for index, row in enumerate(list(rows)[: max(0, limit)], start=1):
+        signal_class, signal_label = relation_signal(row)
+        company_bits = [str(row.get("company") or "").strip(), str(row.get("ticker") or "").strip()]
+        company = " ".join(bit for bit in company_bits if bit)
+        matched_terms = ", ".join(_unique_display(_as_list(row.get("matched_terms"))))
+        foot_bits = [
+            f"matched: {matched_terms}" if matched_terms else "",
+            f"confidence: {_display_value(row.get('confidence'))}" if row.get("confidence") is not None else "",
+            f"chunk: {row.get('chunk_id')}" if row.get("chunk_id") else "",
+        ]
+        items.append(
+            {
+                "index": str(index),
+                "signal_class": signal_class,
+                "signal_label": signal_label,
+                "company": company or "Unknown company",
+                "path": _fact_path(row),
+                "ontology": _fact_ontology_path(row),
+                "evidence": str(row.get("evidence") or row.get("chunk_preview") or "").strip(),
+                "foot": " · ".join(bit for bit in foot_bits if bit),
+            }
+        )
+    return items
+
+
+def ask_relation_card_html(item: dict[str, str]) -> str:
+    signal_class = item["signal_class"]
+    evidence = item["evidence"] or "No evidence snippet stored for this relation."
+    ontology = item.get("ontology") or ""
+    ontology_html = (
+        '<div class="cf-relation-ontology"><strong>Ontology:</strong> {ontology}</div>'.format(
+            ontology=escape(ontology)
+        )
+        if ontology
+        else ""
+    )
+    return (
+        '<div class="cf-relation-card {signal_class}">'
+        '<div class="cf-relation-meta">'
+        '<span>#{index}</span>'
+        '<span class="cf-relation-badge {signal_class}">{signal_label}</span>'
+        '<span>{company}</span>'
+        "</div>"
+        '<div class="cf-relation-path">{path}</div>'
+        "{ontology_html}"
+        '<div class="cf-relation-evidence"><strong>Evidence:</strong> {evidence}</div>'
+        '<div class="cf-relation-foot">{foot}</div>'
+        "</div>".format(
+            signal_class=escape(signal_class),
+            index=escape(item["index"]),
+            signal_label=escape(item["signal_label"]),
+            company=escape(item["company"]),
+            path=escape(item["path"]),
+            ontology_html=ontology_html,
+            evidence=escape(evidence),
+            foot=escape(item["foot"]),
+        )
+    )
+
+
+def ask_relation_cards_html(items: Iterable[dict[str, str]]) -> str:
+    relation_items = list(items)
+    section_specs = [
+        (
+            "support",
+            "Support / upside",
+            "Growth, demand, revenue, adoption, or other supportive relation paths.",
+        ),
+        (
+            "risk",
+            "Risk / pressure",
+            "Margin pressure, constraints, reductions, exposure, or other headwind relation paths.",
+        ),
+        (
+            "neutral",
+            "Other relation paths",
+            "Matched relation paths that are neither clearly support nor risk.",
+        ),
+    ]
+    grouped_sections: dict[str, str] = {}
+    for signal_class, title, subtitle in section_specs:
+        group = [item for item in relation_items if item.get("signal_class") == signal_class]
+        if not group:
+            continue
+        cards = "".join(ask_relation_card_html(item) for item in group)
+        grouped_sections[signal_class] = (
+            '<div class="cf-relation-section">'
+            '<div class="cf-relation-section-head">'
+            '<span class="cf-relation-section-title {signal_class}">{title}</span>'
+            '<span class="cf-relation-section-count">{count} relation(s)</span>'
+            "</div>"
+            '<div class="cf-relation-section-sub">{subtitle}</div>'
+            "{cards}"
+            "</div>".format(
+                signal_class=escape(signal_class),
+                title=escape(title),
+                count=len(group),
+                subtitle=escape(subtitle),
+                cards=cards,
+            )
+        )
+    sections: list[str] = []
+    signal_columns = "".join(grouped_sections[key] for key in ("support", "risk") if key in grouped_sections)
+    if signal_columns:
+        sections.append(f'<div class="cf-relation-signal-grid">{signal_columns}</div>')
+    if "neutral" in grouped_sections:
+        sections.append(grouped_sections["neutral"])
+    return '<div class="cf-relation-list">' + "".join(sections) + "</div>"
+
+
+def render_ask_relation_cards(rows: Iterable[dict[str, Any]], *, limit: int = 12) -> None:
+    items = ask_relation_card_items(rows, limit=limit)
+    if not items:
+        st.info("No relation paths matched this question.")
+        return
+    st.markdown(ask_relation_cards_html(items), unsafe_allow_html=True)
+
+
+def aura_tool_option_labels() -> list[str]:
+    return [definition["label"] for definition in AURA_TOOL_DEFINITIONS.values()]
+
+
+def aura_tool_parameters(tool_name: str, *, question: str = "", limit: int = 80) -> dict[str, Any]:
+    definition = AURA_TOOL_DEFINITIONS[tool_name]
+    params: dict[str, Any] = {"limit": limit, "tool_type": definition["tool_type"]}
+    if definition["requires_question"]:
+        params["question"] = question
+    return params
+
+
+def build_aura_tool_router_prompt(question: str) -> str:
+    tool_lines = [
+        f"- {name} ({definition['tool_type']}): {definition['description']}"
+        for name, definition in AURA_TOOL_DEFINITIONS.items()
+    ]
+    return f"""
+User question:
+{question}
+
+Available tools:
+{chr(10).join(tool_lines)}
+
+Routing rules:
+- Choose `frequent_entities` when the user asks for the most frequently mentioned entities, top entities, common entities, entity frequency, or entity ranking across the loaded graph.
+- Choose `loaded_company_universe` only when the user asks what companies or tickers are loaded, available, covered, current, or verifiable.
+- Choose `company_ai_deep_dive` when the user asks about one specific company or ticker, especially about AI demand, Blackwell, data center, product, or revenue signals.
+- Choose `product_category_evidence_map` when the user asks to map evidence for a product/category across companies, such as AI accelerators, GPUs, custom silicon, networking, storage, or semiconductors.
+- Choose `ai_positive_demand_by_company` when the user asks for cross-company positive demand signals, AI infrastructure demand, or company-by-company demand evidence.
+- Choose `ai_risks_constraints_by_company` when the user asks for cross-company risks, constraints, bottlenecks, shortages, margin pressure, capacity limits, capex limits, supply limits, regulation, or other headwinds to AI infrastructure growth.
+- If multiple tools could apply, prefer the most specific tool: company deep dive > product/category map > risks/constraints by company > positive demand by company > loaded company universe.
+
+Return:
+- tool_name: one of the available tool names.
+- rationale: one short sentence explaining the choice.
+- normalized_question: a concise version of the question to pass into the selected tool. Preserve company names, tickers, products, and categories.
+""".strip()
+
+
+def validate_aura_tool_route(route: dict[str, Any], question: str) -> dict[str, str]:
+    tool_name = str(route.get("tool_name") or "").strip()
+    if tool_name not in AURA_TOOL_DEFINITIONS:
+        raise ValueError(f"Router selected unknown Aura tool: {tool_name or 'n/a'}")
+    normalized_question = str(route.get("normalized_question") or question or AURA_TOOL_PRESETS.get(tool_name, "")).strip()
+    return {
+        "tool_name": tool_name,
+        "rationale": str(route.get("rationale") or "Selected by Aura tool router.").strip(),
+        "normalized_question": normalized_question,
+    }
+
+
+def deterministic_aura_tool_route(question: str) -> dict[str, str] | None:
+    normalized_question = re.sub(r"\s+", " ", question or "").strip()
+    lowered = normalized_question.lower()
+    if not lowered:
+        return None
+
+    company_names = ("nvidia", "nvda", "cisco", "csco", "microsoft", "msft", "alphabet", "googl", "google")
+    if any(company in lowered for company in company_names) and any(
+        term in lowered for term in ("ai", "blackwell", "data center", "revenue", "demand", "deep dive")
+    ):
+        return {
+            "tool_name": "company_ai_deep_dive",
+            "rationale": "The question asks about one named company's AI-related graph evidence.",
+            "normalized_question": normalized_question,
+        }
+
+    entity_ranking_terms = (
+        "frequently mentioned entities",
+        "most frequently mentioned entities",
+        "most mentioned entities",
+        "top entities",
+        "common entities",
+        "entity frequency",
+        "entity ranking",
+        "mentioned entities",
+    )
+    if any(term in lowered for term in entity_ranking_terms):
+        return {
+            "tool_name": "frequent_entities",
+            "rationale": "The question asks for an entity frequency ranking across the loaded graph.",
+            "normalized_question": normalized_question,
+        }
+
+    product_terms = (
+        "product category",
+        "category",
+        "ai accelerator",
+        "accelerator",
+        "gpu",
+        "blackwell",
+        "custom silicon",
+        "semiconductor",
+        "networking",
+        "storage",
+    )
+    if any(term in lowered for term in product_terms) and any(
+        term in lowered for term in ("evidence", "summarize", "map", "across", "company", "companies", "loaded graph")
+    ):
+        return {
+            "tool_name": "product_category_evidence_map",
+            "rationale": "The question asks for cross-company product-category evidence.",
+            "normalized_question": normalized_question,
+        }
+
+    positive_demand_terms = (
+        "positive demand",
+        "demand signals",
+        "positive signals",
+        "ai infrastructure demand",
+        "ai infrastructure industry",
+    )
+    if any(term in lowered for term in positive_demand_terms):
+        return {
+            "tool_name": "ai_positive_demand_by_company",
+            "rationale": "The question asks for cross-company positive AI infrastructure demand signals.",
+            "normalized_question": normalized_question,
+        }
+
+    risk_constraint_terms = (
+        "risk",
+        "risks",
+        "constraint",
+        "constraints",
+        "bottleneck",
+        "bottlenecks",
+        "shortage",
+        "shortages",
+        "headwind",
+        "headwinds",
+        "limit",
+        "limits",
+        "limited",
+        "pressure",
+        "margin pressure",
+        "supply",
+        "capacity",
+        "capex",
+        "regulation",
+        "regulatory",
+        "export control",
+    )
+    if any(term in lowered for term in risk_constraint_terms) and any(
+        term in lowered for term in ("ai", "infrastructure", "data center", "accelerator", "cloud", "growth", "company", "companies")
+    ):
+        return {
+            "tool_name": "ai_risks_constraints_by_company",
+            "rationale": "The question asks for cross-company AI infrastructure risks or constraints.",
+            "normalized_question": normalized_question,
+        }
+
+    loaded_universe_phrases = (
+        "which companies",
+        "what companies",
+        "list companies",
+        "show companies",
+        "loaded companies",
+        "company universe",
+        "which tickers",
+        "what tickers",
+        "loaded tickers",
+    )
+    if any(phrase in lowered for phrase in loaded_universe_phrases) and any(
+        token in lowered for token in ("loaded", "available", "covered", "current", "universe", "graph")
+    ):
+        return {
+            "tool_name": "loaded_company_universe",
+            "rationale": "The question asks which companies are loaded in the graph.",
+            "normalized_question": normalized_question,
+        }
+
+    return None
+
+
+def route_aura_tool(question: str) -> dict[str, str]:
+    deterministic_route = deterministic_aura_tool_route(question)
+    if deterministic_route:
+        return validate_aura_tool_route(deterministic_route, question)
+
+    client = GeminiClient(timeout=75, max_retries=1, retry_delay=1.0)
+    generated = client.generate_json(
+        build_aura_tool_router_prompt(question),
+        AURA_TOOL_ROUTER_SCHEMA,
+        system_instruction=AURA_TOOL_ROUTER_SYSTEM,
+        temperature=0.0,
+        operation="Gemini Aura tool router",
+    )
+    return validate_aura_tool_route(generated, question)
+
+
+def build_aura_text2cypher_prompt(tool_name: str, question: str, *, max_limit: int = TEXT2CYPHER_MAX_LIMIT) -> str:
+    definition = AURA_TOOL_DEFINITIONS[tool_name]
+    if tool_name not in AURA_TEXT2CYPHER_TOOL_NAMES:
+        raise ValueError(f"{tool_name} is not a Text2Cypher Aura tool.")
+    if tool_name == "ai_positive_demand_by_company":
+        task = """
+Find positive AI infrastructure demand signals across loaded companies. Prefer rows where AI, AI infrastructure, cloud, networking, custom silicon, accelerators, Blackwell, data center, or semiconductor capacity connect to growth, demand, revenue, orders, backlog, adoption, production, or capacity.
+        Return columns that help build this table: company, ticker, graph_reasoning_path, referenced_chunk, source, relation, target, source_concepts, target_concepts.
+        Include the supporting MarkdownChunk text or preview as referenced_chunk. Return company-balanced chunks: aim for the strongest one or two source-backed paths per loaded company, not many rows from the first matching company.
+Cypher strategy: build candidate rows with company/ticker, ORDER BY company and confidence or evidence strength, WITH company and collect(row)[0..2] AS company_rows, UNWIND company_rows AS row, then RETURN row.company, row.ticker, etc. Apply LIMIT only after this company balancing.
+""".strip()
+    elif tool_name == "ai_risks_constraints_by_company":
+        task = """
+Find risks, constraints, bottlenecks, or headwinds to AI infrastructure growth across loaded companies. Prefer rows where AI, AI infrastructure, cloud, networking, custom silicon, accelerators, Blackwell, data center, semiconductors, storage, or servers connect to constraints, supply limits, capacity limits, capex requirements, margin pressure, power/energy limits, shortages, competition, regulation, export controls, timing, or cost.
+        Return columns that help build this table: company, ticker, graph_reasoning_path, referenced_chunk, source, relation, target, source_concepts, target_concepts.
+        Include the supporting MarkdownChunk text or preview as referenced_chunk. Return company-balanced chunks: aim for the strongest one or two source-backed paths per loaded company, not many rows from the first matching company.
+Cypher strategy: build candidate rows with company/ticker, ORDER BY company and confidence or evidence strength, WITH company and collect(row)[0..2] AS company_rows, UNWIND company_rows AS row, then RETURN row.company, row.ticker, etc. Apply LIMIT only after this company balancing.
+""".strip()
+    elif tool_name == "company_ai_deep_dive":
+        task = """
+Find source-backed graph paths for the company named in the question, especially AI demand, Blackwell, AI infrastructure, data center revenue growth, accelerator demand, and business transformation.
+        Return columns that help build this table: graph_reasoning_path, referenced_chunk, source, relation, target, company, ticker, source_concepts, target_concepts.
+        Include the supporting MarkdownChunk text or preview as referenced_chunk.
+Prefer rows for the requested company only when the question names a company or ticker.
+""".strip()
+    elif tool_name == "product_category_evidence_map":
+        task = """
+Map the requested product category across companies. For an AI accelerator question, include accelerators, GPUs, Blackwell, custom silicon, cloud/data center capacity, networking, semiconductor manufacturing, and related demand/revenue/capex paths.
+        Return columns that help build this table: company, ticker, graph_reasoning_path, referenced_chunk, source, relation, target, source_concepts, target_concepts.
+        Include the supporting MarkdownChunk text or preview as referenced_chunk. Return company-balanced chunks: aim for the strongest one or two source-backed paths per loaded company, not many rows from the first matching company.
+Cypher strategy: build candidate rows with company/ticker, ORDER BY company and confidence or evidence strength, WITH company and collect(row)[0..2] AS company_rows, UNWIND company_rows AS row, then RETURN row.company, row.ticker, etc. Apply LIMIT only after this company balancing.
+""".strip()
+    return f"""
+User question:
+{question}
+
+Aura tool:
+{tool_name}
+
+Tool task:
+{task}
+
+Graph schema:
+{TEXT2CYPHER_GRAPH_SCHEMA}
+
+Generate one read-only Neo4j Cypher query for this exact tool.
+
+Rules:
+- Use only the labels, relationship types, and properties listed above.
+- Prefer RelationFact -> Entity -> MarkdownChunk -> SourceDocument -> Company evidence paths.
+- Include source-backed MarkdownChunk text or preview as a referenced_chunk column, plus readable graph path strings.
+- The `cypher` field must be one complete executable query containing MATCH or OPTIONAL MATCH, RETURN, and LIMIT.
+- Do not return only a WHERE clause, a partial query fragment, or explanatory text in the `cypher` field.
+- Do not write or mutate the graph.
+- Do not use procedures or CALL.
+- Do not use range(); if you need to expand a list, UNWIND the list itself.
+- Include a LIMIT no larger than {max_limit}.
+- Return readable column aliases for display in a Streamlit table.
+- When searching text, use lower-case CONTAINS checks over entity names, relation type, evidence, and ontology concepts.
+- For cross-company tools, avoid returning only the first company alphabetically. Balance by company before LIMIT.
+""".strip()
+
+
+def build_aura_text2cypher_repair_prompt(
+    tool_name: str,
+    question: str,
+    invalid_cypher: str,
+    validation_error: str,
+    *,
+    max_limit: int = TEXT2CYPHER_MAX_LIMIT,
+) -> str:
+    return f"""
+The previous Text2Cypher output for the Aura tool failed validation.
+
+Aura tool:
+{tool_name}
+
+User question:
+{question}
+
+Validation error:
+{validation_error}
+
+Invalid Cypher:
+{invalid_cypher or 'EMPTY'}
+
+Repair the query. Return one complete read-only Neo4j Cypher query in the `cypher` field.
+
+Hard requirements:
+- Include MATCH, OPTIONAL MATCH, or WITH.
+- Include RETURN.
+- Include LIMIT no larger than {max_limit}.
+- Do not use procedures or CALL.
+- Do not use range().
+- Do not include comments or markdown fences.
+
+Use this original tool prompt for intent and schema:
+{build_aura_text2cypher_prompt(tool_name, question, max_limit=max_limit)}
+""".strip()
+
+
+def build_aura_text2cypher_diversity_repair_prompt(
+    tool_name: str,
+    question: str,
+    generated_cypher: str,
+    observed_companies: Iterable[str],
+    *,
+    max_limit: int = TEXT2CYPHER_MAX_LIMIT,
+) -> str:
+    companies = ", ".join(company for company in observed_companies if company) or "none"
+    return f"""
+The previous query for this cross-company Aura tool returned chunks for too few companies.
+
+Aura tool:
+{tool_name}
+
+User question:
+{question}
+
+Observed companies in returned rows:
+{companies}
+
+Previous Cypher:
+{generated_cypher or 'EMPTY'}
+
+Rewrite the Cypher so it returns company-balanced referenced chunks across loaded companies.
+
+Hard requirements:
+- Return the strongest one or two source-backed rows per company when available.
+- Build candidate row maps with company, ticker, graph_reasoning_path, referenced_chunk, source, relation, target, and concepts.
+- Use `WITH company, collect(row)[0..2] AS company_rows` followed by `UNWIND company_rows AS row` or an equivalent company-balanced pattern.
+- Apply LIMIT no larger than {max_limit} only after company balancing.
+- Include RETURN and LIMIT.
+- Do not use procedures or CALL.
+- Do not use range().
+- Do not include comments or markdown fences.
+
+Use this original tool prompt for intent and schema:
+{build_aura_text2cypher_prompt(tool_name, question, max_limit=max_limit)}
+""".strip()
+
+
+def build_aura_text2cypher_execution_repair_prompt(
+    tool_name: str,
+    question: str,
+    generated_cypher: str,
+    execution_error: str,
+    *,
+    max_limit: int = TEXT2CYPHER_MAX_LIMIT,
+) -> str:
+    return f"""
+The previous query for this Aura tool passed local validation but failed when Neo4j executed it.
+
+Aura tool:
+{tool_name}
+
+User question:
+{question}
+
+Neo4j execution error:
+{execution_error}
+
+Failed Cypher:
+{generated_cypher or 'EMPTY'}
+
+Repair the query. Return one complete read-only Neo4j Cypher query in the `cypher` field.
+
+Hard requirements:
+- Include MATCH, OPTIONAL MATCH, or WITH.
+- Include RETURN.
+- Include LIMIT no larger than {max_limit}.
+- Do not use procedures or CALL.
+- Do not use range().
+- Use Neo4j list-comprehension syntax as `[item IN list | item.property]`, never `[item.property | item IN list]`.
+- Do not include comments or markdown fences.
+
+Use this original tool prompt for intent and schema:
+{build_aura_text2cypher_prompt(tool_name, question, max_limit=max_limit)}
+""".strip()
+
+
+def aura_company_filter_terms(question: str) -> list[str]:
+    lowered = re.sub(r"\s+", " ", question or "").strip().lower()
+    known_companies = {
+        "nvidia": ["nvidia", "nvda"],
+        "nvda": ["nvidia", "nvda"],
+        "cisco": ["cisco", "csco"],
+        "csco": ["cisco", "csco"],
+        "microsoft": ["microsoft", "msft"],
+        "msft": ["microsoft", "msft"],
+        "marvell": ["marvell", "mrvl"],
+        "mrvl": ["marvell", "mrvl"],
+        "netapp": ["netapp", "ntap"],
+        "ntap": ["netapp", "ntap"],
+        "seagate": ["seagate", "stx"],
+        "stx": ["seagate", "stx"],
+        "super micro": ["super micro", "supermicro", "smci"],
+        "supermicro": ["super micro", "supermicro", "smci"],
+        "smci": ["super micro", "supermicro", "smci"],
+        "alphabet": ["alphabet", "google", "googl"],
+        "google": ["alphabet", "google", "googl"],
+        "googl": ["alphabet", "google", "googl"],
+    }
+    for needle, terms in known_companies.items():
+        if needle in lowered:
+            return terms
+    return []
+
+
+def aura_text2cypher_fallback(
+    tool_name: str,
+    question: str = "",
+    *,
+    max_limit: int = TEXT2CYPHER_MAX_LIMIT,
+) -> dict[str, Any] | None:
+    if tool_name == "company_ai_deep_dive":
+        company_terms = aura_company_filter_terms(question)
+        if not company_terms:
+            return None
+        topic_terms = [
+            "artificial intelligence",
+            "ai demand",
+            "ai infrastructure",
+            "generative ai",
+            "blackwell",
+            "data center",
+            "data center revenue",
+            "accelerator",
+            "accelerator demand",
+            "gpu",
+        ]
+        limit = min(max(1, int(max_limit or TEXT2CYPHER_MAX_LIMIT)), 25)
+        company_terms_cypher = json.dumps(company_terms)
+        topic_terms_cypher = json.dumps(topic_terms)
+        cypher = f"""
+MATCH (fact:RelationFact)-[:FROM_ENTITY]->(src:Entity),
+      (fact)-[:TO_ENTITY]->(dst:Entity)
+OPTIONAL MATCH (fact)-[:SUPPORTED_BY]->(chunk:MarkdownChunk)<-[:HAS_CHUNK]-(source_doc:SourceDocument)-[:ABOUT_COMPANY]->(company:Company)
+OPTIONAL MATCH (src)-[:MAPS_TO]->(source_concept:OntologyConcept)
+OPTIONAL MATCH (dst)-[:MAPS_TO]->(target_concept:OntologyConcept)
+WITH company, src, dst, fact, chunk, source_doc,
+     collect(DISTINCT source_concept.name) AS source_concepts,
+     collect(DISTINCT target_concept.name) AS target_concepts,
+     {company_terms_cypher} AS company_terms,
+     {topic_terms_cypher} AS topic_terms
+WHERE company IS NOT NULL
+  AND coalesce(fact.evidence_text, '') <> ''
+  AND any(term IN company_terms
+      WHERE toLower(coalesce(company.name, '')) CONTAINS term
+         OR toLower(coalesce(company.ticker, '')) CONTAINS term)
+  AND any(term IN topic_terms
+      WHERE toLower(coalesce(src.name, '')) CONTAINS term
+         OR toLower(coalesce(dst.name, '')) CONTAINS term
+         OR toLower(coalesce(fact.evidence_text, '')) CONTAINS term
+         OR toLower(coalesce(fact.relation_type, '')) CONTAINS term)
+RETURN company.name AS company,
+       company.ticker AS ticker,
+       coalesce(src.name, 'Unknown source') + ' --' + coalesce(fact.relation_type, 'RELATED_TO') + '--> ' + coalesce(dst.name, 'Unknown target') AS graph_reasoning_path,
+       coalesce(fact.evidence_text, chunk.text_preview, chunk.text) AS referenced_chunk,
+       chunk.text AS chunk_text,
+       chunk.text_preview AS chunk_preview,
+       src.name AS source,
+       fact.relation_type AS relation,
+       dst.name AS target,
+       source_concepts AS source_concepts,
+       target_concepts AS target_concepts,
+       source_doc.id AS document,
+       chunk.id AS chunk_id
+ORDER BY coalesce(fact.confidence, 0.0) DESC
+LIMIT {limit}
+""".strip()
+        return {
+            "cypher": cypher,
+            "rationale": "Safe fallback query for one-company AI demand, Blackwell, and data-center evidence chunks.",
+            "expected_columns": [
+                "company",
+                "ticker",
+                "graph_reasoning_path",
+                "referenced_chunk",
+                "chunk_text",
+                "chunk_preview",
+                "source",
+                "relation",
+                "target",
+                "source_concepts",
+                "target_concepts",
+            ],
+        }
+
+    if tool_name == "ai_positive_demand_by_company":
+        category_terms = [
+            "ai",
+            "ai infrastructure",
+            "cloud",
+            "networking",
+            "custom silicon",
+            "accelerator",
+            "blackwell",
+            "data center",
+            "semiconductor",
+            "storage",
+            "server",
+        ]
+        signal_terms = [
+            "growth",
+            "demand",
+            "revenue",
+            "order",
+            "backlog",
+            "adoption",
+            "capacity",
+            "production",
+            "strong",
+            "increase",
+        ]
+        rationale = "Safe fallback query for cross-company positive AI infrastructure demand chunks."
+    elif tool_name == "ai_risks_constraints_by_company":
+        category_terms = [
+            "ai",
+            "ai infrastructure",
+            "cloud",
+            "networking",
+            "custom silicon",
+            "accelerator",
+            "blackwell",
+            "data center",
+            "semiconductor",
+            "storage",
+            "server",
+        ]
+        signal_terms = [
+            "risk",
+            "constraint",
+            "constrain",
+            "bottleneck",
+            "shortage",
+            "limited",
+            "limit",
+            "capacity",
+            "supply",
+            "capex",
+            "cost",
+            "margin",
+            "pressure",
+            "power",
+            "energy",
+            "regulation",
+            "regulatory",
+            "export",
+            "competition",
+        ]
+        rationale = "Safe fallback query for cross-company AI infrastructure risk and constraint chunks."
+    elif tool_name == "product_category_evidence_map":
+        category_terms = [
+            "ai accelerator",
+            "accelerator",
+            "gpu",
+            "blackwell",
+            "custom silicon",
+            "ai infrastructure",
+            "data center",
+            "semiconductor",
+            "networking",
+            "cloud",
+            "capacity",
+        ]
+        signal_terms = [
+            "demand",
+            "revenue",
+            "growth",
+            "capex",
+            "capacity",
+            "supply",
+            "production",
+            "order",
+            "backlog",
+            "customer",
+            "adoption",
+        ]
+        rationale = "Safe fallback query for cross-company AI accelerator product-category evidence chunks."
+    else:
+        return None
+
+    limit = max(1, int(max_limit or TEXT2CYPHER_MAX_LIMIT))
+    category_terms_cypher = json.dumps(category_terms)
+    signal_terms_cypher = json.dumps(signal_terms)
+    cypher = f"""
+MATCH (fact:RelationFact)-[:FROM_ENTITY]->(src:Entity),
+      (fact)-[:TO_ENTITY]->(dst:Entity)
+OPTIONAL MATCH (fact)-[:SUPPORTED_BY]->(chunk:MarkdownChunk)<-[:HAS_CHUNK]-(source_doc:SourceDocument)-[:ABOUT_COMPANY]->(company:Company)
+OPTIONAL MATCH (src)-[:MAPS_TO]->(source_concept:OntologyConcept)
+OPTIONAL MATCH (dst)-[:MAPS_TO]->(target_concept:OntologyConcept)
+WITH company, src, dst, fact, chunk, source_doc,
+     collect(DISTINCT source_concept.name) AS source_concepts,
+     collect(DISTINCT target_concept.name) AS target_concepts,
+     {category_terms_cypher} AS category_terms,
+     {signal_terms_cypher} AS signal_terms
+WHERE company IS NOT NULL
+  AND coalesce(fact.evidence_text, '') <> ''
+  AND (
+    any(term IN category_terms
+        WHERE toLower(coalesce(src.name, '')) CONTAINS term
+           OR toLower(coalesce(dst.name, '')) CONTAINS term
+           OR toLower(coalesce(fact.evidence_text, '')) CONTAINS term
+           OR toLower(coalesce(fact.relation_type, '')) CONTAINS term)
+    OR any(concept IN source_concepts + target_concepts
+        WHERE any(term IN category_terms WHERE toLower(coalesce(concept, '')) CONTAINS term))
+  )
+  AND any(term IN signal_terms
+      WHERE toLower(coalesce(src.name, '')) CONTAINS term
+         OR toLower(coalesce(dst.name, '')) CONTAINS term
+         OR toLower(coalesce(fact.relation_type, '')) CONTAINS term
+         OR toLower(coalesce(fact.evidence_text, '')) CONTAINS term)
+WITH company, fact,
+     {{
+       company: company.name,
+       ticker: company.ticker,
+       graph_reasoning_path: coalesce(src.name, 'Unknown source') + ' --' + coalesce(fact.relation_type, 'RELATED_TO') + '--> ' + coalesce(dst.name, 'Unknown target'),
+       referenced_chunk: coalesce(fact.evidence_text, chunk.text_preview, chunk.text),
+       chunk_text: chunk.text,
+       chunk_preview: chunk.text_preview,
+       source: src.name,
+       relation: fact.relation_type,
+       target: dst.name,
+       source_concepts: source_concepts,
+       target_concepts: target_concepts,
+       confidence: coalesce(fact.confidence, 0.0),
+       document: source_doc.id,
+       chunk_id: chunk.id
+     }} AS row
+ORDER BY company.name, coalesce(fact.confidence, 0.0) DESC
+WITH company.name AS company_name, collect(row)[0..2] AS company_rows
+UNWIND company_rows AS row
+RETURN row.company AS company,
+       row.ticker AS ticker,
+       row.graph_reasoning_path AS graph_reasoning_path,
+       row.referenced_chunk AS referenced_chunk,
+       row.chunk_text AS chunk_text,
+       row.chunk_preview AS chunk_preview,
+       row.source AS source,
+       row.relation AS relation,
+       row.target AS target,
+       row.source_concepts AS source_concepts,
+       row.target_concepts AS target_concepts,
+       row.document AS document,
+       row.chunk_id AS chunk_id
+LIMIT {limit}
+""".strip()
+    return {
+        "cypher": cypher,
+        "rationale": rationale,
+        "expected_columns": [
+            "company",
+            "ticker",
+            "graph_reasoning_path",
+            "referenced_chunk",
+            "chunk_text",
+            "chunk_preview",
+            "source",
+            "relation",
+            "target",
+            "source_concepts",
+            "target_concepts",
+        ],
+    }
+
+
+def generate_aura_text2cypher(tool_name: str, question: str, *, max_limit: int = TEXT2CYPHER_MAX_LIMIT) -> dict[str, Any]:
+    client = GeminiClient(timeout=120, max_retries=1, retry_delay=1.0)
+    generated = client.generate_json(
+        build_aura_text2cypher_prompt(tool_name, question, max_limit=max_limit),
+        TEXT2CYPHER_SCHEMA,
+        system_instruction=TEXT2CYPHER_SYSTEM,
+        temperature=0.0,
+        operation=f"Gemini Aura Text2Cypher {tool_name}",
+    )
+    raw_cypher = str(generated.get("cypher") or "")
+    try:
+        cypher, warnings = validate_text2cypher(raw_cypher, max_limit=max_limit)
+    except ValueError as first_error:
+        repaired = client.generate_json(
+            build_aura_text2cypher_repair_prompt(
+                tool_name,
+                question,
+                raw_cypher,
+                str(first_error),
+                max_limit=max_limit,
+            ),
+            TEXT2CYPHER_SCHEMA,
+            system_instruction=TEXT2CYPHER_SYSTEM,
+            temperature=0.0,
+            operation=f"Gemini Aura Text2Cypher repair {tool_name}",
+        )
+        repaired_cypher = str(repaired.get("cypher") or "")
+        try:
+            cypher, warnings = validate_text2cypher(repaired_cypher, max_limit=max_limit)
+        except ValueError as second_error:
+            fallback = aura_text2cypher_fallback(tool_name, question, max_limit=max_limit)
+            if fallback:
+                cypher, warnings = validate_text2cypher(str(fallback.get("cypher") or ""), max_limit=max_limit)
+                generated = fallback
+                warnings = [
+                    f"Generated Cypher failed validation twice ({first_error}; {second_error}); used a safe fallback query.",
+                    *warnings,
+                ]
+                return {
+                    "cypher": cypher,
+                    "rationale": str(generated.get("rationale") or ""),
+                    "expected_columns": list(generated.get("expected_columns") or []),
+                    "warnings": warnings,
+                }
+            raw_preview = truncate(raw_cypher, 600)
+            repaired_preview = truncate(repaired_cypher, 600)
+            raise ValueError(
+                "Generated Cypher failed validation after repair. "
+                f"Initial error: {first_error}. Repair error: {second_error}. "
+                f"Initial Cypher: {raw_preview or 'EMPTY'}. Repaired Cypher: {repaired_preview or 'EMPTY'}."
+            ) from second_error
+        generated = repaired
+        warnings = [
+            f"Initial generated Cypher failed validation ({first_error}); repaired automatically.",
+            *warnings,
+        ]
+    return {
+        "cypher": cypher,
+        "rationale": str(generated.get("rationale") or ""),
+        "expected_columns": list(generated.get("expected_columns") or []),
+        "warnings": warnings,
+    }
+
+
+def _row_company_key(row: dict[str, Any]) -> str:
+    return str(row.get("company") or row.get("Company") or row.get("ticker") or row.get("Ticker") or "").strip()
+
+
+def distinct_company_keys(rows: Iterable[dict[str, Any]]) -> list[str]:
+    seen: set[str] = set()
+    companies: list[str] = []
+    for row in rows:
+        company = _row_company_key(row)
+        if company and company not in seen:
+            seen.add(company)
+            companies.append(company)
+    return companies
+
+
+def company_balanced_rows(rows: Iterable[dict[str, Any]], *, limit: int = 80, rows_per_company: int = 2) -> list[dict[str, Any]]:
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    fallback: list[dict[str, Any]] = []
+    for row in rows:
+        company = _row_company_key(row)
+        if not company:
+            fallback.append(row)
+            continue
+        buckets.setdefault(company, []).append(row)
+    balanced: list[dict[str, Any]] = []
+    for company in sorted(buckets):
+        balanced.extend(buckets[company][:rows_per_company])
+        if len(balanced) >= limit:
+            return balanced[:limit]
+    if len(balanced) < limit:
+        balanced.extend(fallback[: limit - len(balanced)])
+    return balanced[:limit]
+
+
+def clean_referenced_chunk_text(value: Any) -> str:
+    """Normalize chunk text for display without artificial trailing ellipses."""
+
+    text = re.sub(r"\s+", " ", str(value or "")).strip()
+    text = text.replace("\u00ae", "").replace("㈢", "")
+    while True:
+        previous = text
+        text = re.sub(r"\s*(?:\.{3,}|\?{2,})\s*$", "", text).rstrip()
+        text = text.rstrip("\u2026\ufffd").rstrip()
+        if text == previous:
+            return text
+
+
+def aura_answer_rows_for_prompt(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Prepare Aura answer rows so the user-facing answer shows chunks instead of derived evidence columns."""
+
+    prepared: list[dict[str, Any]] = []
+    for row in rows:
+        clean = dict(row)
+        referenced_chunk = (
+            clean.get("referenced_chunk")
+            or clean.get("chunk_text")
+            or clean.get("chunk_preview")
+            or clean.get("chunk")
+            or clean.get("evidence")
+        )
+        if referenced_chunk:
+            clean["referenced_chunk"] = clean_referenced_chunk_text(referenced_chunk)
+        for redundant_key in ("positive_signal", "product_category_signal", "signal"):
+            clean.pop(redundant_key, None)
+        clean.pop("evidence", None)
+        prepared.append(clean)
+    return prepared
+
+
+def repair_aura_text2cypher_for_company_diversity(
+    tool_name: str,
+    question: str,
+    cypher: str,
+    observed_companies: Iterable[str],
+    *,
+    max_limit: int = TEXT2CYPHER_MAX_LIMIT,
+) -> dict[str, Any]:
+    client = GeminiClient(timeout=120, max_retries=1, retry_delay=1.0)
+    generated = client.generate_json(
+        build_aura_text2cypher_diversity_repair_prompt(
+            tool_name,
+            question,
+            cypher,
+            observed_companies,
+            max_limit=max_limit,
+        ),
+        TEXT2CYPHER_SCHEMA,
+        system_instruction=TEXT2CYPHER_SYSTEM,
+        temperature=0.0,
+        operation=f"Gemini Aura Text2Cypher diversity repair {tool_name}",
+    )
+    repaired_cypher, warnings = validate_text2cypher(str(generated.get("cypher") or ""), max_limit=max_limit)
+    return {
+        "cypher": repaired_cypher,
+        "rationale": str(generated.get("rationale") or ""),
+        "expected_columns": list(generated.get("expected_columns") or []),
+        "warnings": warnings,
+    }
+
+
+def is_cypher_execution_error(error: str | Exception | None) -> bool:
+    lowered = str(error or "").lower()
+    return any(
+        token in lowered
+        for token in (
+            "neo.clienterror.statement.syntaxerror",
+            "syntax error",
+            "invalid input",
+            "expected an expression",
+        )
+    )
+
+
+def is_query_timeout_error(error: str | Exception | None) -> bool:
+    lowered = str(error or "").lower()
+    return any(
+        token in lowered
+        for token in (
+            "timeout",
+            "timed out",
+            "transaction timed out",
+            "terminated by the database",
+        )
+    )
+
+
+def repair_aura_text2cypher_for_execution_error(
+    tool_name: str,
+    question: str,
+    cypher: str,
+    execution_error: str,
+    *,
+    max_limit: int = TEXT2CYPHER_MAX_LIMIT,
+) -> dict[str, Any]:
+    client = GeminiClient(timeout=120, max_retries=1, retry_delay=1.0)
+    generated = client.generate_json(
+        build_aura_text2cypher_execution_repair_prompt(
+            tool_name,
+            question,
+            cypher,
+            execution_error,
+            max_limit=max_limit,
+        ),
+        TEXT2CYPHER_SCHEMA,
+        system_instruction=TEXT2CYPHER_SYSTEM,
+        temperature=0.0,
+        operation=f"Gemini Aura Text2Cypher execution repair {tool_name}",
+    )
+    repaired_cypher, warnings = validate_text2cypher(str(generated.get("cypher") or ""), max_limit=max_limit)
+    return {
+        "cypher": repaired_cypher,
+        "rationale": str(generated.get("rationale") or ""),
+        "expected_columns": list(generated.get("expected_columns") or []),
+        "warnings": warnings,
+    }
+
+
+def run_aura_text2cypher_tool(tool_name: str, question: str, *, max_limit: int = TEXT2CYPHER_MAX_LIMIT) -> tuple[dict[str, Any] | None, str | None]:
+    max_limit = safe_aura_text2cypher_limit(max_limit)
+    if tool_name in AURA_DETERMINISTIC_TEXT2CYPHER_TOOL_NAMES:
+        fallback = aura_text2cypher_fallback(tool_name, question, max_limit=max_limit)
+        if fallback:
+            try:
+                cypher, warnings = validate_text2cypher(str(fallback.get("cypher") or ""), max_limit=max_limit)
+            except ValueError as exc:
+                return None, str(exc)
+            rows, error = neo4j_query(
+                cypher,
+                timeout_seconds=AURA_TEXT2CYPHER_QUERY_TIMEOUT_SECONDS,
+            )
+            deterministic_scope = "cross-company" if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES else "company deep-dive"
+            generated = {
+                **fallback,
+                "cypher": cypher,
+                "warnings": [
+                    f"Used the deterministic {deterministic_scope} query to avoid slow or invalid Text2Cypher generation.",
+                    *warnings,
+                ],
+            }
+            if error:
+                return {**generated, "rows": []}, error
+            if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES:
+                rows = company_balanced_rows(rows, limit=max_limit, rows_per_company=2)
+            else:
+                rows = rows[:max_limit]
+            return {**generated, "rows": rows}, None
+
+    try:
+        generated = generate_aura_text2cypher(tool_name, question, max_limit=max_limit)
+    except (GeminiApiError, ValueError) as exc:
+        return None, str(exc)
+    rows, error = neo4j_query(
+        generated["cypher"],
+        timeout_seconds=AURA_TEXT2CYPHER_QUERY_TIMEOUT_SECONDS,
+    )
+    if error and is_query_timeout_error(error):
+        fallback = aura_text2cypher_fallback(tool_name, question, max_limit=max_limit)
+        if fallback:
+            try:
+                fallback_cypher, fallback_warnings = validate_text2cypher(str(fallback.get("cypher") or ""), max_limit=max_limit)
+                fallback_rows, fallback_error = neo4j_query(
+                    fallback_cypher,
+                    timeout_seconds=AURA_TEXT2CYPHER_QUERY_TIMEOUT_SECONDS,
+                )
+                if not fallback_error:
+                    generated = {
+                        **fallback,
+                        "cypher": fallback_cypher,
+                        "warnings": [
+                            "Generated Text2Cypher query timed out; used the safe fallback query.",
+                            *generated.get("warnings", []),
+                            *fallback_warnings,
+                        ],
+                    }
+                    rows = fallback_rows
+                    error = None
+            except ValueError as exc:
+                generated["warnings"] = [
+                    *generated.get("warnings", []),
+                    f"Timeout fallback skipped: {friendly_agent_error(exc, stage='timeout fallback')}",
+                ]
+    if error and is_cypher_execution_error(error):
+        try:
+            repaired = repair_aura_text2cypher_for_execution_error(
+                tool_name,
+                question,
+                generated["cypher"],
+                error,
+                max_limit=max_limit,
+            )
+            repaired_rows, repaired_error = neo4j_query(
+                repaired["cypher"],
+                timeout_seconds=AURA_TEXT2CYPHER_QUERY_TIMEOUT_SECONDS,
+            )
+            if not repaired_error:
+                generated = {
+                    **repaired,
+                    "warnings": [
+                        "Initial query had a Neo4j syntax issue; repaired automatically.",
+                        *repaired.get("warnings", []),
+                    ],
+                }
+                rows = repaired_rows
+                error = None
+            else:
+                generated["warnings"] = [
+                    *generated.get("warnings", []),
+                    f"Execution repair query failed: {friendly_agent_error(repaired_error, stage='query repair')}",
+                ]
+        except (GeminiApiError, ValueError) as exc:
+            generated["warnings"] = [
+                *generated.get("warnings", []),
+                f"Execution repair skipped: {friendly_agent_error(exc, stage='query repair')}",
+            ]
+    if not error and tool_name in AURA_CROSS_COMPANY_TOOL_NAMES and rows:
+        companies = distinct_company_keys(rows)
+        if len(companies) < 2:
+            try:
+                repaired = repair_aura_text2cypher_for_company_diversity(
+                    tool_name,
+                    question,
+                    generated["cypher"],
+                    companies,
+                    max_limit=max_limit,
+                )
+                repaired_rows, repaired_error = neo4j_query(
+                    repaired["cypher"],
+                    timeout_seconds=AURA_TEXT2CYPHER_QUERY_TIMEOUT_SECONDS,
+                )
+                if not repaired_error:
+                    generated = {
+                        **repaired,
+                        "warnings": [
+                            f"Initial query returned only {', '.join(companies) or 'one company'}; regenerated for company-balanced chunks.",
+                            *repaired.get("warnings", []),
+                        ],
+                    }
+                    rows = repaired_rows
+                else:
+                    generated["warnings"] = [
+                        *generated.get("warnings", []),
+                        f"Company-diversity repair query failed: {friendly_agent_error(repaired_error, stage='company-diversity repair')}",
+                    ]
+            except (GeminiApiError, ValueError) as exc:
+                generated["warnings"] = [
+                    *generated.get("warnings", []),
+                    f"Company-diversity repair skipped: {friendly_agent_error(exc, stage='company-diversity repair')}",
+                ]
+    if error:
+        return {**generated, "rows": []}, error
+    if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES:
+        rows = company_balanced_rows(rows, limit=max_limit, rows_per_company=2)
+    return {**generated, "rows": rows}, None
+
+
+def build_aura_tool_answer_prompt(
+    *,
+    tool_name: str,
+    question: str = "",
+    params: dict[str, Any] | None = None,
+    rows: Iterable[dict[str, Any]] | None = None,
+    cypher: str = "",
+    rationale: str = "",
+) -> str:
+    answer_row_limit = 80 if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES else 50
+    row_list = (
+        company_balanced_rows(rows or [], limit=answer_row_limit, rows_per_company=2)
+        if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES
+        else list(rows or [])[:answer_row_limit]
+    )
+    row_list = aura_answer_rows_for_prompt(row_list)
+    row_json = truncate(json.dumps(row_list, ensure_ascii=False, default=str, indent=2), 16000)
+    params_json = json.dumps(params or {}, ensure_ascii=False, default=str, indent=2)
+    definition = AURA_TOOL_DEFINITIONS[tool_name]
+    company_coverage = ", ".join(distinct_company_keys(row_list)) or "n/a"
+    if tool_name == "ai_positive_demand_by_company":
+        output_spec = """
+Produce Markdown that matches this shape:
+# Executive summary
+One concise paragraph.
+
+# Company-by-company referenced chunks
+A Markdown table with columns: Company, Graph reasoning path, Referenced chunk.
+
+# Cross-company themes
+Bullets.
+""".strip()
+    elif tool_name == "ai_risks_constraints_by_company":
+        output_spec = """
+Produce Markdown that matches this shape:
+# Executive summary
+One concise paragraph.
+
+# Company-by-company risk and constraint chunks
+A Markdown table with columns: Company, Graph reasoning path, Referenced chunk.
+
+# Cross-company risk themes
+Bullets.
+""".strip()
+    elif tool_name == "company_ai_deep_dive":
+        output_spec = """
+Produce Markdown that matches this shape:
+# Executive Summary
+One concise paragraph about the requested company.
+
+# Company AI Deep Dive
+A Markdown table with columns: Graph reasoning path, Referenced chunk.
+
+# Graph Reasoning Takeaway
+One concise paragraph.
+""".strip()
+    elif tool_name == "product_category_evidence_map":
+        output_spec = """
+Produce Markdown that matches this shape:
+# Executive summary
+One concise paragraph.
+
+# Company-by-company product chunks
+A Markdown table with columns: Company, Graph reasoning path, Referenced chunk.
+
+# Cross-company themes
+Bullets.
+""".strip()
+    else:
+        output_spec = """
+Produce a concise Markdown answer. If the rows list companies, use a bullet list with company name and ticker.
+""".strip()
+    return "\n\n".join(
+        [
+            "You are recreating the Neo4j Aura Agent answer style for an earnings-call graph demo.",
+            f"Tool: {tool_name}",
+            f"Tool type: {definition['tool_type']}",
+            f"Question: {question or 'No explicit question; summarize the tool result.'}",
+            f"Parameters:\n{params_json}",
+            f"Text2Cypher rationale: {rationale or 'n/a'}",
+            f"Generated Cypher:\n{cypher}" if cypher else "Generated Cypher: n/a",
+            f"Company coverage in rows: {company_coverage}",
+            f"Tool rows, company-balanced and truncated to {answer_row_limit} rows:\n{row_json if row_json else '[]'}",
+            output_spec,
+            "Use only the rows, referenced chunks, and graph paths provided. Do not invent companies, metrics, or outside facts.",
+            "For cross-company tools, include all companies present in the provided rows; do not focus only on the first company.",
+            "Use exactly the requested table columns. Do not add extra summary, interpretation, or rationale columns.",
+            "Keep referenced chunks compact, but do not append artificial ellipses (`...` or `…`).",
+            "Do not include a section or heading named Evidence gaps, Evidence Gaps, Caveats, or Evidence gaps or caveats.",
+            "If there are no rows, say the graph returned no matching evidence and suggest a broader query.",
+        ]
+    )
+
+
+def strip_evidence_gap_sections(markdown: str) -> str:
+    """Remove evidence-gap/caveat sections from Aura tool answers."""
+
+    kept: list[str] = []
+    skipping = False
+    for line in markdown.splitlines():
+        heading_match = re.match(r"^\s{0,3}#{1,6}\s+(.*)$", line)
+        if heading_match:
+            heading = heading_match.group(1).strip().lower()
+            skipping = "evidence gap" in heading or "caveat" in heading
+            if skipping:
+                continue
+        if not skipping:
+            kept.append(line)
+    return "\n".join(kept).strip()
+
+
+def _markdown_table_cells(line: str) -> list[str] | None:
+    stripped = line.strip()
+    if not stripped.startswith("|") or not stripped.endswith("|"):
+        return None
+    return [cell.strip() for cell in stripped.strip("|").split("|")]
+
+
+def _markdown_table_row(cells: list[str]) -> str:
+    return "| " + " | ".join(cells) + " |"
+
+
+def _is_markdown_separator_row(cells: list[str]) -> bool:
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.strip()) for cell in cells)
+
+
+def strip_aura_redundant_signal_columns(markdown: str) -> str:
+    """Remove redundant LLM-created signal/evidence columns from Aura answer tables."""
+
+    blocked_headers = {
+        "positive signal",
+        "product/category signal",
+        "signal",
+        "evidence",
+        "why it matters",
+    }
+    lines = markdown.splitlines()
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        cells = _markdown_table_cells(lines[index])
+        if cells is None:
+            output.append(lines[index])
+            index += 1
+            continue
+
+        table_lines: list[str] = []
+        while index < len(lines) and _markdown_table_cells(lines[index]) is not None:
+            table_lines.append(lines[index])
+            index += 1
+
+        header_cells = _markdown_table_cells(table_lines[0]) or []
+        drop_indices = {
+            cell_index
+            for cell_index, cell in enumerate(header_cells)
+            if re.sub(r"\s+", " ", cell.replace("**", "").strip().lower()) in blocked_headers
+        }
+        if not drop_indices:
+            output.extend(table_lines)
+            continue
+
+        for line in table_lines:
+            row_cells = _markdown_table_cells(line) or []
+            kept_cells = [cell for cell_index, cell in enumerate(row_cells) if cell_index not in drop_indices]
+            if _is_markdown_separator_row(row_cells):
+                kept_cells = ["---" for _ in kept_cells]
+            else:
+                kept_cells = [clean_referenced_chunk_text(cell) for cell in kept_cells]
+            output.append(_markdown_table_row(kept_cells))
+    return "\n".join(output).strip()
+
+
+def _markdown_cell(value: Any, *, limit: int = 240) -> str:
+    text = clean_referenced_chunk_text(value)
+    text = truncate(text, limit)
+    return text.replace("|", "\\|").replace("\n", " ").strip()
+
+
+def _row_haystack(row: dict[str, Any]) -> str:
+    return " ".join(
+        str(value or "")
+        for value in (
+            row.get("graph_reasoning_path"),
+            row.get("referenced_chunk"),
+            row.get("source"),
+            row.get("relation"),
+            row.get("target"),
+        )
+    ).lower()
+
+
+def _first_matching_phrase(rows: Iterable[dict[str, Any]], terms: Iterable[str], *, limit: int = 140) -> str:
+    lowered_terms = [term.lower() for term in terms]
+    for row in rows:
+        haystack = _row_haystack(row)
+        if any(term in haystack for term in lowered_terms):
+            phrase = row.get("referenced_chunk") or row.get("graph_reasoning_path") or _fact_path(row)
+            return _markdown_cell(phrase, limit=limit)
+    return ""
+
+
+def local_aura_executive_summary(tool_name: str, rows: list[dict[str, Any]], company_text: str) -> str:
+    if tool_name == "company_ai_deep_dive":
+        blackwell = _first_matching_phrase(rows, ["blackwell"])
+        ai_infra = _first_matching_phrase(rows, ["ai infrastructure", "giga-scale ai", "generative ai", "accelerator", "gpu"])
+        data_center = _first_matching_phrase(rows, ["data center revenue", "$41.1 billion", "revenue grew", "second-quarter revenue"])
+        parts: list[str] = []
+        if blackwell:
+            parts.append(f"Blackwell appears as a central product/platform signal ({blackwell}).")
+        if ai_infra:
+            parts.append(f"The graph also links NVIDIA to AI infrastructure buildout ({ai_infra}).")
+        if data_center:
+            parts.append(f"Data Center revenue is connected to growth evidence ({data_center}).")
+        if parts:
+            return " ".join(parts)
+        return f"{company_text} has company-specific AI-related graph evidence, but the returned rows do not isolate a stronger Blackwell or Data Center revenue theme."
+    if tool_name == "ai_risks_constraints_by_company":
+        return f"The returned rows highlight company-level risks, bottlenecks, or constraints tied to AI infrastructure growth across {company_text}."
+    if tool_name == "product_category_evidence_map":
+        return f"The returned rows map product-category evidence across {company_text}, with graph paths and referenced chunks for each company."
+    return f"The returned rows show company-balanced positive AI infrastructure demand evidence across {company_text}."
+
+
+def build_local_aura_tool_answer(tool_name: str, rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Render a deterministic Aura-style answer from tool rows without another LLM call."""
+
+    if tool_name == "company_ai_deep_dive":
+        row_limit = 12
+    else:
+        row_limit = 80 if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES else 50
+    row_list = (
+        company_balanced_rows(rows, limit=row_limit, rows_per_company=2)
+        if tool_name in AURA_CROSS_COMPANY_TOOL_NAMES
+        else list(rows)[:row_limit]
+    )
+    row_list = aura_answer_rows_for_prompt(row_list)
+    if not row_list:
+        return {
+            "markdown": "The graph returned no matching evidence for this Aura tool question. Try a broader question or load more graph data.",
+            "source": "local",
+        }
+
+    companies = distinct_company_keys(row_list)
+    company_text = ", ".join(companies) if companies else "the returned companies"
+    if tool_name == "company_ai_deep_dive":
+        title = "Company AI Deep Dive"
+        summary = local_aura_executive_summary(tool_name, row_list, company_text)
+        theme_heading = "Graph Reasoning Takeaway"
+    elif tool_name == "ai_risks_constraints_by_company":
+        title = "Company-by-company risk and constraint chunks"
+        summary = local_aura_executive_summary(tool_name, row_list, company_text)
+        theme_heading = "Cross-company risk themes"
+    elif tool_name == "product_category_evidence_map":
+        title = "Company-by-company product chunks"
+        summary = local_aura_executive_summary(tool_name, row_list, company_text)
+        theme_heading = "Cross-company themes"
+    else:
+        title = "Company-by-company referenced chunks"
+        summary = local_aura_executive_summary(tool_name, row_list, company_text)
+        theme_heading = "Cross-company themes"
+
+    include_company = tool_name != "company_ai_deep_dive"
+    headers = ["Graph reasoning path", "Referenced chunk"]
+    if include_company:
+        headers.insert(0, "Company")
+    table = [
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join("---" for _ in headers) + " |",
+    ]
+    for row in row_list:
+        cells = [
+            _markdown_cell(row.get("graph_reasoning_path") or _fact_path(row)),
+            _markdown_cell(row.get("referenced_chunk") or row.get("chunk_text") or row.get("chunk_preview")),
+        ]
+        if include_company:
+            cells.insert(0, _markdown_cell(row.get("company") or row.get("ticker") or "Unknown company", limit=80))
+        table.append("| " + " | ".join(cells) + " |")
+
+    relation_counts: dict[str, int] = {}
+    for row in row_list:
+        path = str(row.get("graph_reasoning_path") or _fact_path(row) or "").strip()
+        if path:
+            relation_counts[path] = relation_counts.get(path, 0) + 1
+    themes = sorted(relation_counts, key=lambda path: (-relation_counts[path], path))[:3]
+    if themes:
+        theme_lines = [f"- {_markdown_cell(theme, limit=180)}" for theme in themes]
+    else:
+        theme_lines = ["- The returned rows provide referenced chunks but no graph reasoning paths."]
+
+    return {
+        "markdown": "\n\n".join(
+            [
+                "# Executive summary",
+                summary,
+                f"# {title}",
+                "\n".join(table),
+                f"# {theme_heading}",
+                "\n".join(theme_lines),
+            ]
+        ),
+        "source": "local",
+    }
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def summarize_aura_tool_output(
+    tool_name: str,
+    question: str,
+    params: dict[str, Any],
+    rows: list[dict[str, Any]],
+    cypher: str = "",
+    rationale: str = "",
+) -> dict[str, Any]:
+    if tool_name in AURA_DETERMINISTIC_TEXT2CYPHER_TOOL_NAMES:
+        return build_local_aura_tool_answer(tool_name, rows)
+
+    prompt = build_aura_tool_answer_prompt(
+        tool_name=tool_name,
+        question=question,
+        params=params,
+        rows=rows,
+        cypher=cypher,
+        rationale=rationale,
+    )
+    client = GeminiClient(timeout=90, max_retries=2, retry_delay=2.0)
+    generated = client.generate_json(
+        prompt,
+        AURA_TOOL_MARKDOWN_SCHEMA,
+        system_instruction=AURA_TOOL_ANSWER_SYSTEM,
+        temperature=0.2,
+        operation=f"Gemini Aura tool answer {tool_name}",
+    )
+    markdown = strip_evidence_gap_sections(str(generated.get("markdown") or ""))
+    markdown = strip_aura_redundant_signal_columns(markdown)
+    return {**generated, "markdown": markdown}
+
+
+def render_aura_markdown_answer(answer: dict[str, Any]) -> None:
+    markdown = str(answer.get("markdown") or "").strip()
+    if markdown:
+        st.markdown(markdown)
+    else:
+        st.info("LLM returned no markdown answer.")
+
+
+def frequent_entities_markdown(rows: Iterable[dict[str, Any]]) -> str:
+    row_list = list(rows)
+    if not row_list:
+        return "No mentioned entities were found in the loaded earnings-call graph."
+    table = [
+        "| Rank | Entity | Type | Mentions | Companies | Evidence chunks | Concepts |",
+        "| --- | --- | --- | ---: | --- | ---: | --- |",
+    ]
+    for index, row in enumerate(row_list, start=1):
+        sample_companies = ", ".join(str(item) for item in _as_list(row.get("sample_companies")) if item) or "n/a"
+        concepts = ", ".join(str(item) for item in _as_list(row.get("concepts")) if item) or "n/a"
+        table.append(
+            "| "
+            + " | ".join(
+                [
+                    str(index),
+                    _markdown_cell(row.get("entity"), limit=120),
+                    _markdown_cell(row.get("entity_type") or "Entity", limit=80),
+                    str(int(row.get("mention_count") or 0)),
+                    _markdown_cell(sample_companies, limit=160),
+                    str(int(row.get("evidence_count") or 0)),
+                    _markdown_cell(concepts, limit=160),
+                ]
+            )
+            + " |"
+        )
+    top = row_list[0]
+    summary = (
+        f"The most frequently mentioned entity is **{_markdown_cell(top.get('entity'), limit=120)}** "
+        f"with {int(top.get('mention_count') or 0)} mention(s)."
+    )
+    return "\n\n".join(["# Most frequently mentioned entities", summary, "\n".join(table)])
 
 def key_node_explanation(node: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, str]:
     name = node.get("name") or (rows[0].get("node_name") if rows else "Selected node")
@@ -2144,13 +4029,18 @@ def _fact_path(row: dict[str, Any], *, include_concepts: bool = False) -> str:
     target = _entity_display(row.get("target"), row.get("target_properties"))
     path = f"{source} --{row.get('relation') or ''}--> {target}".strip()
     if include_concepts:
-        source_concepts = _unique_display(_as_list(row.get("source_concepts")))[:2]
-        target_concepts = _unique_display(_as_list(row.get("target_concepts")))[:2]
-        if source_concepts and target_concepts:
-            path += f" [concepts: {', '.join(source_concepts)} -> {', '.join(target_concepts)}]"
-        elif source_concepts or target_concepts:
-            path += f" [concepts: {', '.join([*source_concepts, *target_concepts])}]"
+        ontology = _fact_ontology_path(row)
+        if ontology:
+            path += f" [ontology: {ontology}]"
     return path
+
+
+def _fact_ontology_path(row: dict[str, Any]) -> str:
+    source_concepts = _unique_display(_as_list(row.get("source_concepts")))[:2]
+    target_concepts = _unique_display(_as_list(row.get("target_concepts")))[:2]
+    if source_concepts and target_concepts:
+        return f"{', '.join(source_concepts)} -> {', '.join(target_concepts)}"
+    return ", ".join([*source_concepts, *target_concepts])
 
 
 def _entity_display(name: Any, properties: Any) -> str:
@@ -2659,6 +4549,204 @@ def show_error_if_any(error: str | None) -> bool:
     return False
 
 
+def friendly_agent_error(error: str | Exception, *, stage: str = "agent") -> str:
+    text = str(error)
+    lowered = text.lower()
+    if "timed out" in lowered or "timeout" in lowered:
+        return (
+            f"The {stage} is taking longer than expected. "
+            "Please try again with a slightly narrower question, or rerun the same question."
+        )
+    if "gemini api" in lowered:
+        return f"The {stage} could not complete the LLM request. Please try again."
+    if is_cypher_execution_error(text):
+        return (
+            f"The {stage} generated Cypher with a Neo4j syntax issue. "
+            "I tried to repair it automatically; rerun the question if the answer is incomplete."
+        )
+    return text
+
+
+def aura_agent_progress_messages(tool_type: str) -> list[str]:
+    tool_step = (
+        "2/3 Running the Cypher template..."
+        if tool_type == "cypher_template"
+        else "2/3 Generating and running the Text2Cypher tool..."
+    )
+    answer_step = (
+        "3/3 Rendering template results..."
+        if tool_type == "cypher_template"
+        else "3/3 Writing the answer from tool rows..."
+    )
+    return [
+        "1/3 Routing the question to the best tool...",
+        tool_step,
+        answer_step,
+    ]
+
+
+def render_aura_tool_tester(*, max_relation_rows: int = 1, max_company_rows: int = 1) -> None:
+
+    question = st.text_area(
+        "Question for the Aura tool agent",
+        value=AURA_TOOL_PRESETS["ai_positive_demand_by_company"],
+        height=90,
+        key="aura_agent_question",
+        help="The router chooses the tool from this question. The selected tool then receives the normalized question.",
+    )
+    if not st.button("Ask agent", key="aura_tool_route_and_run"):
+        return
+
+    debug_started_at = perf_counter()
+    debug_events: list[dict[str, Any]] = []
+
+    def render_debug_log(*, expanded: bool = True) -> None:
+        with st.expander("Aura debug log", expanded=expanded):
+            st.caption("Stage-by-stage local logs for debugging router, tool, database, and answer-writer behavior.")
+            st.json(debug_events)
+
+    def log_debug(stage: str, status: str = "info", **details: Any) -> None:
+        debug_events.append(
+            {
+                "elapsed_s": round(perf_counter() - debug_started_at, 3),
+                "stage": stage,
+                "status": status,
+                **details,
+            }
+        )
+
+    progress = st.container(border=True)
+    progress.info("Ask agent is running...")
+    log_debug("question_received", question=question)
+    progress.write("1/3 Routing the question to the best tool...")
+    log_debug("router_start")
+    try:
+        route = route_aura_tool(question)
+        route = validate_aura_tool_route(route, question)
+    except (GeminiApiError, ValueError) as exc:
+        log_debug("router_error", status="error", error=str(exc), friendly_error=friendly_agent_error(exc, stage="tool router"))
+        progress.error("Ask agent stopped during routing.")
+        st.warning(friendly_agent_error(exc, stage="tool router"))
+        render_debug_log(expanded=True)
+        return
+
+    tool_name = route["tool_name"]
+    tool_question = route["normalized_question"]
+    definition = AURA_TOOL_DEFINITIONS[tool_name]
+    log_debug(
+        "router_success",
+        tool_name=tool_name,
+        tool_type=definition["tool_type"],
+        rationale=route["rationale"],
+        normalized_question=tool_question,
+    )
+    progress_messages = aura_agent_progress_messages(str(definition["tool_type"]))
+    tool_limit = aura_tool_limit(
+        str(definition["tool_type"]),
+        max_company_rows=max_company_rows,
+        max_relation_rows=max_relation_rows,
+    )
+    if tool_name == "frequent_entities":
+        tool_limit = min(max(1, int(max_relation_rows or 30)), 50)
+    params = aura_tool_parameters(tool_name, question=tool_question, limit=tool_limit)
+    log_debug("tool_params", params=params)
+
+    with st.expander("Agent routing details", expanded=False):
+        st.json(
+            {
+                "tool": tool_name,
+                "tool_type": definition["tool_type"],
+                "rationale": route["rationale"],
+                "params": params,
+            }
+        )
+
+    if tool_name == "loaded_company_universe":
+        progress.write(progress_messages[1])
+        log_debug("tool_start", tool_name=tool_name, params=params)
+        rows, error = loaded_company_universe_rows(tool_limit)
+        if show_error_if_any(error):
+            log_debug("tool_error", status="error", error=error)
+            progress.error("Ask agent stopped while loading companies.")
+            render_debug_log(expanded=True)
+            return
+        log_debug("tool_success", row_count=len(rows))
+        progress.write(progress_messages[2])
+        progress.success("Ask agent completed.")
+        st.markdown("The following companies are currently loaded in the earnings-call graph:")
+        for row in rows:
+            company = row.get("company") or "Unknown company"
+            ticker = row.get("ticker") or "n/a"
+            st.markdown(f"- **{escape(str(company))}** (Ticker: {escape(str(ticker))})")
+        render_debug_log(expanded=False)
+        with st.expander("Raw tool rows", expanded=False):
+            st.dataframe(rows, width="stretch", hide_index=True)
+        return
+
+    if tool_name == "frequent_entities":
+        progress.write(progress_messages[1])
+        log_debug("tool_start", tool_name=tool_name, params=params)
+        rows, error = frequent_entity_rows(tool_limit)
+        if show_error_if_any(error):
+            log_debug("tool_error", status="error", error=error)
+            progress.error("Ask agent stopped while ranking entities.")
+            render_debug_log(expanded=True)
+            return
+        log_debug("tool_success", row_count=len(rows))
+        progress.write(progress_messages[2])
+        progress.success("Ask agent completed.")
+        st.markdown(frequent_entities_markdown(rows))
+        render_debug_log(expanded=False)
+        with st.expander("Raw tool rows", expanded=False):
+            st.dataframe(rows, width="stretch", hide_index=True)
+        return
+
+    progress.write(progress_messages[1])
+    log_debug("tool_start", tool_name=tool_name, params=params)
+    result, error = run_aura_text2cypher_tool(tool_name, tool_question, max_limit=tool_limit)
+    result_rows = (result or {}).get("rows") or []
+    log_debug(
+        "tool_result",
+        status="error" if error else "ok",
+        error=error,
+        row_count=len(result_rows),
+        warnings=(result or {}).get("warnings") or [],
+        rationale=(result or {}).get("rationale") or "",
+        cypher=(result or {}).get("cypher") or "",
+    )
+    if error:
+        progress.error("Ask agent stopped while running the tool.")
+        st.warning(friendly_agent_error(error, stage="tool path"))
+        render_debug_log(expanded=True)
+        if result:
+            with st.expander("Raw tool rows", expanded=False):
+                st.dataframe(result.get("rows") or [], width="stretch", hide_index=True)
+        return
+    if result:
+        try:
+            progress.write(progress_messages[2])
+            log_debug("answer_writer_start", row_count=len(result.get("rows") or []))
+            answer = summarize_aura_tool_output(
+                tool_name,
+                tool_question,
+                params,
+                result.get("rows") or [],
+                cypher=str(result.get("cypher") or ""),
+                rationale=str(result.get("rationale") or ""),
+            )
+            log_debug("answer_writer_success", markdown_chars=len(str(answer.get("markdown") or "")))
+            progress.success("Ask agent completed.")
+            render_aura_markdown_answer(answer)
+        except GeminiApiError as exc:
+            log_debug("answer_writer_error", status="error", error=str(exc), friendly_error=friendly_agent_error(exc, stage="answer writer"))
+            progress.error("Ask agent stopped while writing the answer.")
+            st.warning(friendly_agent_error(exc, stage="answer writer"))
+            render_debug_log(expanded=True)
+            return
+        render_debug_log(expanded=False)
+        with st.expander("Raw tool rows", expanded=False):
+            st.dataframe(result.get("rows") or [], width="stretch", hide_index=True)
+
 def render_counts(rows: list[dict[str, Any]]) -> None:
     cols = st.columns(min(4, max(1, len(rows))))
     for index, row in enumerate(rows):
@@ -2674,7 +4762,7 @@ def _context_pill(count_map: dict[str, Any], label: str, caption: str) -> str:
 
 
 def run_app() -> None:
-    st.set_page_config(page_title="Earnings Call Graph Thesis Agent", page_icon="G", layout="wide")
+    st.set_page_config(page_title="Earnings Call Graph Agent", page_icon="G", layout="wide")
     st.markdown(APP_CSS, unsafe_allow_html=True)
     counts, count_error = graph_counts()
     count_map = {row.get("label"): row.get("count") for row in counts} if not count_error else {}
@@ -2682,8 +4770,7 @@ def run_app() -> None:
         f"""
         <div class="cf-header">
           <div class="cf-brand">
-            <span class="cf-glyph">G</span>
-            <span class="cf-title">Earnings Call Graph Thesis Agent</span>
+            <span class="cf-title">Earnings Call Graph Agent</span>
             <span class="cf-subtitle">conference-call ontology | Neo4j evidence-backed analyst agent</span>
           </div>
           <div class="cf-header-stats">
@@ -2775,7 +4862,7 @@ def run_app() -> None:
         if count_error:
             st.warning("Neo4j is not connected.")
 
-    tabs = st.tabs(["Graph", "Ask", "Key Nodes"])
+    tabs = st.tabs(APP_TAB_LABELS)
 
     with tabs[0]:
         st.markdown('<div class="cf-section-title">Conference-call relation graph</div>', unsafe_allow_html=True)
@@ -2924,7 +5011,7 @@ def run_app() -> None:
 
     with tabs[1]:
         st.markdown('<div class="cf-section-title">Ask the graph</div>', unsafe_allow_html=True)
-        st.markdown('<div class="cf-section-sub">Ask ignores Graph search. The default answer uses deterministic graph matching against entities, relations, evidence snippets, properties, and ontology concepts. Experimental Text2Cypher can generate a read-only ad-hoc query when the template-like matcher is too narrow.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="cf-section-sub">Ask ignores Graph search and uses deterministic graph matching against entities, relations, evidence snippets, properties, and ontology concepts. Use Ask (Aura) for routed Text2Cypher tool workflows.</div>', unsafe_allow_html=True)
         question_choice = st.selectbox(
             "Suggested questions",
             [CUSTOM_QUESTION_LABEL, *ASK_QUESTION_PRESETS],
@@ -2936,35 +5023,6 @@ def run_app() -> None:
         if not show_error_if_any(error):
             rows = sorted(rows, key=lambda row: _insight_rank(row, query_terms(question)))
             answer = answer_question_from_relations(question, rows)
-            st.markdown(
-                f"""
-                <div class="cf-panel">
-                  <div class="cf-answer-label">Answer</div>
-                  <div class="cf-answer-text">{escape(answer["summary"])}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                f"""
-                <div class="cf-answer-grid">
-                  <div class="cf-answer-card">
-                    <div class="cf-answer-label">Upside / support</div>
-                    <div class="cf-answer-text">{escape(answer["bull_case"])}</div>
-                  </div>
-                  <div class="cf-answer-card risk">
-                    <div class="cf-answer-label">Risk / pressure</div>
-                    <div class="cf-answer-text">{escape(answer["risk_case"])}</div>
-                  </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            if answer.get("property_insights"):
-                st.info(answer["property_insights"])
-            st.caption(answer["basis"])
-            with st.expander("Matched evidence"):
-                st.dataframe(_table_rows(rows), width="stretch", hide_index=True)
             st.markdown("#### LLM summary from referenced chunks")
             render_chunk_summary_action(
                 context_title=f"Ask: {question}",
@@ -2973,29 +5031,27 @@ def run_app() -> None:
                 button_key=f"ask_chunk_summary_{abs(hash(question))}",
                 limit=8,
             )
+            render_ask_relation_cards(rows, limit=min(limit, 12))
+            if answer.get("property_insights"):
+                st.info(answer["property_insights"])
+            st.caption(answer["basis"])
+            with st.expander("Matched evidence"):
+                st.dataframe(_table_rows(rows), width="stretch", hide_index=True)
             st.markdown("#### Referenced chunks")
             render_referenced_chunks(rows, limit=8)
-            with st.expander("Experimental Text2Cypher", expanded=False):
-                st.caption(
-                    "Optional ad-hoc path for Aura Agent exploration. The generated query is validated as read-only, "
-                    "must include RETURN and LIMIT, and is displayed before/with its result. The deterministic answer above remains the default."
-                )
-                if st.button("Generate and run Text2Cypher", key=f"text2cypher_{abs(hash(question))}"):
-                    result, text2cypher_error = run_text2cypher_question(question)
-                    if result:
-                        if result.get("rationale"):
-                            st.markdown(f"**Rationale:** {escape(str(result['rationale']))}")
-                        for warning in result.get("warnings") or []:
-                            st.warning(warning)
-                        st.code(result.get("cypher") or "", language="cypher")
-                        if result.get("rows"):
-                            st.dataframe(result["rows"], width="stretch", hide_index=True)
-                        else:
-                            st.info("Text2Cypher returned no rows.")
-                    if text2cypher_error:
-                        st.warning(f"Text2Cypher path failed: {text2cypher_error}")
-
     with tabs[2]:
+        st.markdown('<div class="cf-section-title">Ask with Aura-style tools</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="cf-section-sub">Ask a question and let the local router choose the matching Aura-style graph tool. '
+            'This tab mirrors the AuraDB tool workflows while running inside the Streamlit app.</div>',
+            unsafe_allow_html=True,
+        )
+        render_aura_tool_tester(
+            max_relation_rows=int(count_map.get("RelationFact") or available_results or 1),
+            max_company_rows=int(count_map.get("Company") or 1),
+        )
+
+    with tabs[3]:
         st.markdown('<div class="cf-section-title">Key node explanations</div>', unsafe_allow_html=True)
         st.markdown('<div class="cf-section-sub">Key Nodes ignore Graph search. Nodes are ranked from the full loaded graph, with graph paths and referenced source chunks.</div>', unsafe_allow_html=True)
         nodes, error = key_node_rows(limit=30)

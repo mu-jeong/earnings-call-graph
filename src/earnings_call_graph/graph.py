@@ -160,7 +160,8 @@ class Neo4jGraph:
         password = password or os.getenv("NEO4J_PASSWORD")
         if not uri or not password:
             raise RuntimeError("NEO4J_URI and NEO4J_PASSWORD are required. Create .env or set shell environment variables.")
-        self.driver = GraphDatabase.driver(uri, auth=(username, password))
+        connection_timeout = float(os.getenv("NEO4J_CONNECTION_TIMEOUT_SECONDS", "10"))
+        self.driver = GraphDatabase.driver(uri, auth=(username, password), connection_timeout=connection_timeout)
 
     def close(self) -> None:
         self.driver.close()
